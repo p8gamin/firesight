@@ -1,0 +1,31 @@
+{
+  "expo": {
+    "name": "FireSight",
+    "slug": "wildfire-monitor",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "wildfiremonitor",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.lithos.wildfiremonitor"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0B0E11"
+      },
+      "package": "com.lithos.wildfiremonitor"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-asset",
+      "expo-font",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "FireSight uses your location to show wildfire activity near you."
+        }
+      ]
+    ]
+  }
+}

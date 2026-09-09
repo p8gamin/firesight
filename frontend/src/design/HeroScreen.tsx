@@ -70,6 +70,10 @@ const HeadingArea = memo(function HeadingArea() {
           {COPY.headingLine2}
         </Text>
       </Entrance>
+      {/* Byline, staggered after the headline settles. */}
+      <Entrance kind="fade" delay={560} style={styles.bylineWrap}>
+        <Text style={styles.byline}>{'A project by Krishnavivek Ivaturi.'}</Text>
+      </Entrance>
     </View>
   );
 });
@@ -227,6 +231,20 @@ const styles = StyleSheet.create({
   },
   headingText: {
     color: COLOR.white,
+    textAlign: 'center',
+  },
+  bylineWrap: {
+    marginTop: 18,
+    alignItems: 'center',
+  },
+  // Brighter than the scroll page's byline so it holds up against the
+  // hero photo — white at 80%, still clearly secondary to the headline.
+  byline: {
+    fontSize: 13,
+    lineHeight: 21,
+    letterSpacing: 0.2,
+    color: COLOR.white80,
+    fontFamily: FONT.interRegular,
     textAlign: 'center',
   },
 });

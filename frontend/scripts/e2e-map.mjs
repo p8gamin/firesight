@@ -133,11 +133,14 @@ try {
   // Wait for the location-triggered fetch to reach a terminal state: real
   // alert cards (backend live), the honest error state (backend down), or
   // "no significant activity" (backend live, nothing detected nearby).
-  // The live backend aggregates upstream feeds and can take 50-110 s.
+  // The live backend aggregates upstream feeds (50-110 s warm); the deployed
+  // Render backend additionally cold-starts and has taken ~240 s to first
+  // byte, so wait just above the app's own 300 s request timeout.
+  const alertsTimeoutMs = 330000;
   await page
     .getByText(/Heat anomaly detected|Alerts unavailable|No significant activity/)
     .first()
-    .waitFor({ timeout: 170000 });
+    .waitFor({ timeout: alertsTimeoutMs });
   const alertNodes = await page
     .locator('text=/Heat anomaly detected|Officially reported wildfire|Alerts unavailable|No significant activity/i')
     .count();

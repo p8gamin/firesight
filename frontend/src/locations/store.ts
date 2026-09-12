@@ -1,20 +1,40 @@
 /**
- * Saved-locations store.
+ * Saved-locations store — now backed by the Supabase `saved_locations` table.
  *
- * Module-level state exposed through useSyncExternalStore so every screen
- * (list, detail, add/edit flow, the map) sees the same locations without a
- * context provider.
+ * The module-level external store (useSyncExternalStore) is kept exactly as
+ * before so every screen (list, detail, add/edit flow, map, alerts) sees the
+ * same locations with no context provider and no navigation changes.
  *
- * Persistence: the list is saved to AsyncStorage on every mutation and
- * re-hydrated on startup, so user-created locations survive reloads and app
- * restarts. The store starts EMPTY — no sample locations; everything on the
- * map comes from what the user actually creates.
+ * What changed under the hood:
+ * - Source of truth is the Supabase table (src/lib/locationsApi.ts). The
+ *   signed-in user's session scopes every read/write via RLS, so a user only
+ *   ever sees their own rows.
+ * - The store listens to auth state: on sign-in it fetches the user's rows;
+ *   on sign-out it clears the in-memory list (no data leaks between
+ *   accounts). Email/password and Google OAuth both flow through the same
+ *   Supabase session, so both sign-in paths load the same data.
+ * - Mutations are optimistic: the UI updates immediately, the write goes to
+ *   Supabase in the background, and a failure rolls the change back and
+ *   surfaces an error (returned to the caller and/or shown by the screen).
+ * - Fields the UI tracks that have no column in the table (monitoring radius,
+ *   monitor/alert toggles, display label) persist locally as preferences
+ *   keyed by the row's uuid — device convenience only, never sent to
+ *   Postgres.
  */
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import type { GeoPoint, Location } from '../types';
+import type { Location } from '../types';
+import { supabase } from '../lib/supabase';
+import {
+  createSavedLocation,
+  deleteSavedLocation,
+  fetchSavedLocations,
+  renameSavedLocation,
+  describeLocationsError,
+} from '../lib/locationsApi';
 
-const STORAGE_KEY = 'firesight.locations.v1';
+/** Where UI-only per-location preferences persist (device-local). */
+const PREFS_KEY = 'firesight.locationPrefs.v1';
 
 export interface LocationDraft {
   name: string;
@@ -27,181 +47,272 @@ export interface LocationDraft {
   alertPrefs: Location['alertPrefs'];
 }
 
-let locations: Location[] = [];
+/** UI-only fields layered on top of a table row. */
+interface LocationExtras {
+  kind: Location['kind'];
+  placeLabel: string;
+  radiusKm: number;
+  alertsEnabled: boolean;
+  monitors: Location['monitors'];
+  alertPrefs: Location['alertPrefs'];
+}
+
+type Phase = 'idle' | 'loading' | 'ready' | 'error';
+
+interface LocationsState {
+  locations: Location[];
+  phase: Phase;
+  /** Human-readable load/mutation failure for the screen to render. */
+  error: string | null;
+}
+
+let state: LocationsState = { locations: [], phase: 'idle', error: null };
 const listeners = new Set<() => void>();
 
-function emit() {
+function setState(patch: Partial<LocationsState>): void {
+  state = { ...state, ...patch };
   for (const l of listeners) l();
 }
 
 /** Subscribe to location changes (also used by the fire-data store). */
 export function subscribeToLocations(cb: () => void): () => void {
   listeners.add(cb);
-  return () => listeners.delete(cb);
+  return () => {
+    listeners.delete(cb);
+  };
 }
 
 /** Current locations snapshot without a hook (also used by the fire store). */
 export function getLocationsSnapshot(): Location[] {
-  return locations;
+  return state.locations;
 }
 
 function getSnapshot(): Location[] {
-  return locations;
+  return state.locations;
 }
 
 function subscribe(cb: () => void): () => void {
   listeners.add(cb);
-  return () => listeners.delete(cb);
-}
-
-function nextId(): string {
-  return `loc-${Date.now().toString(36)}-${Math.floor(Math.random() * 1e4).toString(36)}`;
-}
-
-function persist(): void {
-  AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(locations)).catch(() => {
-    // Storage is best-effort; the in-memory store stays authoritative.
-  });
-}
-
-/** Defensive parse — a bad record is dropped rather than breaking the screen. */
-function parseLocation(raw: unknown): Location | null {
-  if (typeof raw !== 'object' || raw === null) return null;
-  const r = raw as Record<string, unknown>;
-  const point = r.point as Record<string, unknown> | null | undefined;
-  const lat = typeof point?.lat === 'number' && Number.isFinite(point.lat) ? point.lat : null;
-  const lon = typeof point?.lon === 'number' && Number.isFinite(point.lon) ? point.lon : null;
-  if (lat === null || lon === null) return null;
-  if (typeof r.id !== 'string' || r.id.length === 0) return null;
-  const str = (v: unknown, fallback: string): string =>
-    typeof v === 'string' && v.length > 0 ? v : fallback;
-  return {
-    id: r.id,
-    name: str(r.name, 'Saved place'),
-    kind: (r.kind === 'home' || r.kind === 'school' || r.kind === 'family' ? r.kind : 'custom') as Location['kind'],
-    point: { lat, lon } as GeoPoint,
-    placeLabel: str(r.placeLabel, ''),
-    radiusKm: typeof r.radiusKm === 'number' && r.radiusKm > 0 ? r.radiusKm : 25,
-    alertsEnabled: r.alertsEnabled !== false,
-    monitors: {
-      fires: (r.monitors as Record<string, unknown> | undefined)?.fires !== false,
-      heat: (r.monitors as Record<string, unknown> | undefined)?.heat !== false,
-      air: (r.monitors as Record<string, unknown> | undefined)?.air !== false,
-    },
-    alertPrefs: {
-      highConcern: true,
-      moderate: true,
-      newDetections: true,
-      heatAnomalies: false,
-      airQuality: false,
-      ...(r.alertPrefs as Partial<Location['alertPrefs']> | undefined),
-    },
+  return () => {
+    listeners.delete(cb);
   };
 }
 
-//
-// Legacy-data purge.
-//
-// Before the app went empty-by-default it shipped seeded sample locations
-// ("Home", "School", "Mom's House", "Weekend Cabin" — one pinned to the old
-// backend default at 43.7001, -79.4163). Those records may still sit in a
-// user's persisted storage; on hydration they are detected and dropped so
-// the app truly starts from nothing the user created. One-time, then the
-// storage key is rewritten clean.
-//
-const LEGACY_SEED_NAMES = new Set(['home', 'school', "mom's house", 'weekend cabin']);
-const LEGACY_DEFAULT_POINT = { lat: 43.7001, lon: -79.4163 };
+// ---------------------------------------------------------------------------
+// UI-only preference persistence (radius/monitor/alert toggles, labels)
+// ---------------------------------------------------------------------------
 
-function isLegacySeed(loc: Location): boolean {
-  if (LEGACY_SEED_NAMES.has(loc.name.trim().toLowerCase())) return true;
-  // A record sitting exactly on the old backend default — including one the
-  // user renamed — is a leftover, not a real place the user picked.
-  return (
-    Math.abs(loc.point.lat - LEGACY_DEFAULT_POINT.lat) < 1e-6 &&
-    Math.abs(loc.point.lon - LEGACY_DEFAULT_POINT.lon) < 1e-6
-  );
+let extras: Record<string, LocationExtras> = {};
+
+function persistExtras(): void {
+  AsyncStorage.setItem(PREFS_KEY, JSON.stringify(extras)).catch(() => {
+    // Best-effort: losing a toggle preference must never break the list.
+  });
 }
 
-// Hydrate from storage at startup — stored data is the only source.
-let hydrated = false;
-void (async () => {
-  try {
-    const raw = await AsyncStorage.getItem(STORAGE_KEY);
-    if (raw != null) {
-      const parsed: unknown = JSON.parse(raw);
-      if (Array.isArray(parsed)) {
-        const parsedList = parsed
-          .map(parseLocation)
-          .filter((l): l is Location => l !== null);
-        const kept = parsedList.filter((l) => !isLegacySeed(l));
-        if (kept.length !== parsedList.length) {
-          // Purge legacy seeds and rewrite storage so the cleanup sticks.
-          locations = kept;
-          persist();
-        } else {
-          locations = parsedList;
+function loadExtras(): Promise<void> {
+  return AsyncStorage.getItem(PREFS_KEY)
+    .then((raw) => {
+      if (!raw) return;
+      try {
+        const parsed: unknown = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') {
+          extras = parsed as Record<string, LocationExtras>;
         }
-        emit();
+      } catch {
+        // Corrupt cache — defaults apply.
       }
-    }
-  } catch {
-    // Corrupt or unavailable storage — start empty.
-  } finally {
-    hydrated = true;
-    emit();
+    })
+    .catch(() => undefined);
+}
+
+/** Merge a row with the device-side preferences for that row id. */
+function withExtras(loc: Location): Location {
+  const extra = extras[loc.id];
+  if (!extra) return loc;
+  return {
+    ...loc,
+    kind: extra.kind ?? loc.kind,
+    placeLabel: extra.placeLabel ?? loc.placeLabel,
+    radiusKm: extra.radiusKm && extra.radiusKm > 0 ? extra.radiusKm : loc.radiusKm,
+    alertsEnabled: extra.alertsEnabled ?? loc.alertsEnabled,
+    monitors: extra.monitors ?? loc.monitors,
+    alertPrefs: extra.alertPrefs ?? loc.alertPrefs,
+  };
+}
+
+function rememberExtras(loc: Location): void {
+  extras[loc.id] = {
+    kind: loc.kind,
+    placeLabel: loc.placeLabel,
+    radiusKm: loc.radiusKm,
+    alertsEnabled: loc.alertsEnabled,
+    monitors: loc.monitors,
+    alertPrefs: loc.alertPrefs,
+  };
+  persistExtras();
+}
+
+// ---------------------------------------------------------------------------
+// Remote sync (auth-driven)
+// ---------------------------------------------------------------------------
+
+let loadedForUser: string | null = null;
+
+/** Fetch the signed-in user's saved locations and publish them. */
+async function loadForUser(userId: string): Promise<void> {
+  if (loadedForUser === userId) return;
+  loadedForUser = userId;
+  setState({ phase: 'loading', error: null });
+  try {
+    await loadExtras();
+    const rows = await fetchSavedLocations();
+    // Ignore if the user signed out (or switched) while the request ran.
+    if (loadedForUser !== userId) return;
+    setState({ locations: rows.map(withExtras), phase: 'ready', error: null });
+  } catch (e) {
+    if (loadedForUser !== userId) return;
+    setState({
+      phase: 'error',
+      error: describeLocationsError(e),
+      locations: [],
+    });
   }
-})();
-
-export function addLocation(draft: LocationDraft): Location {
-  const loc: Location = { id: nextId(), ...draft };
-  locations = [...locations, loc];
-  emit();
-  persist();
-  return loc;
 }
 
-export function updateLocation(id: string, patch: Partial<LocationDraft>): void {
-  locations = locations.map((l) => (l.id === id ? { ...l, ...patch } : l));
-  emit();
-  persist();
+/** Reset all state (sign-out or account switch). */
+function reset(): void {
+  loadedForUser = null;
+  setState({ locations: [], phase: 'idle', error: null });
 }
 
-export function removeLocation(id: string): void {
-  locations = locations.filter((l) => l.id !== id);
-  emit();
-  persist();
+// Drive the store from the Supabase session. Email/password and Google OAuth
+// both end in the same session, so this covers every sign-in path.
+supabase.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_OUT') {
+    reset();
+    return;
+  }
+  if ((event === 'INITIAL_SESSION' || event === 'SIGNED_IN') && session?.user) {
+    void loadForUser(session.user.id);
+  }
+});
+
+// Retry a failed initial load whenever connectivity/auth comes back.
+export function retryLoadLocations(): void {
+  loadedForUser = null;
+  void supabase.auth
+    .getSession()
+    .then(({ data }) => {
+      if (data.session?.user) void loadForUser(data.session.user.id);
+      else reset();
+    })
+    .catch(() => undefined);
+}
+
+// ---------------------------------------------------------------------------
+// Mutations — optimistic, with rollback on failure
+// ---------------------------------------------------------------------------
+
+function tempId(): string {
+  return `temp-${Date.now().toString(36)}-${Math.floor(Math.random() * 1e4).toString(36)}`;
 }
 
 /**
- * Live list of saved locations (adds/updates/removes propagate instantly to
- * every mounted screen — the map included) plus a short loading window while
- * storage hydrates so the list's skeleton state is a real UI path.
+ * Add a location: optimistic card immediately, then INSERT into
+ * saved_locations with the authenticated user's id (read from the session
+ * in locationsApi — RLS authorizes but never fills the user_id column).
+ * Resolves with the saved Location; rejects with a human-readable message
+ * so the caller (add/edit modal) can show it.
  */
+export async function addLocation(draft: LocationDraft): Promise<Location> {
+  const optimistic: Location = { id: tempId(), ...draft };
+  setState({ locations: [...state.locations, optimistic] });
+  try {
+    const saved = await createSavedLocation({ name: draft.name, point: draft.point });
+    rememberExtras({ ...saved, ...draft, id: saved.id });
+    const withPrefs = withExtras({ ...saved });
+    setState({
+      locations: state.locations.map((l) => (l.id === optimistic.id ? withPrefs : l)),
+    });
+    return withPrefs;
+  } catch (e) {
+    // Roll the optimistic card back — the caller shows the error.
+    setState({ locations: state.locations.filter((l) => l.id !== optimistic.id) });
+    throw new Error(describeLocationsError(e));
+  }
+}
+
+/**
+ * Edit a location. `name` is the only field with a database column, so only
+ * it triggers a network write; everything else updates the device-side
+ * preference for that row. Resolves when any network write completes;
+ * rejects with a readable message after rolling back.
+ */
+export async function updateLocation(
+  id: string,
+  patch: Partial<LocationDraft>
+): Promise<void> {
+  const prev = state.locations;
+  setState({
+    locations: prev.map((l) => (l.id === id ? { ...l, ...patch } : l)),
+  });
+  const updated = state.locations.find((l) => l.id === id);
+  if (updated) rememberExtras(updated);
+
+  if (patch.name === undefined) return;
+  try {
+    await renameSavedLocation(id, patch.name);
+  } catch (e) {
+    setState({ locations: prev }); // roll back
+    if (updated) rememberExtras(prev.find((l) => l.id === id) ?? updated);
+    throw new Error(describeLocationsError(e));
+  }
+}
+
+/**
+ * Remove a location: the card disappears immediately; DELETE (scoped to the
+ * owner by RLS) runs behind it. Rolls back and rejects on failure.
+ */
+export async function removeLocation(id: string): Promise<void> {
+  // Never attempt a delete for an optimistic row that never reached the
+  // database (its create failed and the rollback lost the race).
+  if (id.startsWith('temp-')) {
+    setState({ locations: state.locations.filter((l) => l.id !== id) });
+    return;
+  }
+  const prev = state.locations;
+  setState({ locations: prev.filter((l) => l.id !== id) });
+  const { [id]: removedPrefs, ...restExtras } = extras;
+  extras = restExtras;
+  persistExtras();
+  try {
+    await deleteSavedLocation(id);
+  } catch (e) {
+    setState({ locations: prev });
+    if (removedPrefs) {
+      extras = { ...extras, [id]: removedPrefs };
+      persistExtras();
+    }
+    throw new Error(describeLocationsError(e));
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Hook — same shape as before (locations + loading), plus error/retry
+// ---------------------------------------------------------------------------
+
 export function useLocationsStore(): {
   locations: Location[];
   loading: boolean;
+  error: string | null;
+  retry: () => void;
 } {
   const snapshot = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
-  const [storageSettled, setStorageSettled] = useState(hydrated);
-  const [minLoading, setMinLoading] = useState(true);
-
-  useEffect(() => {
-    if (!storageSettled) {
-      const poll = setInterval(() => {
-        if (hydrated) {
-          setStorageSettled(true);
-          clearInterval(poll);
-        }
-      }, 60);
-      return () => clearInterval(poll);
-    }
-  }, [storageSettled]);
-
-  // Simulated fetch latency (once per mount) for the skeleton state.
-  useEffect(() => {
-    const t = setTimeout(() => setMinLoading(false), 320);
-    return () => clearTimeout(t);
-  }, []);
-
-  return { locations: snapshot, loading: minLoading || !storageSettled };
+  return {
+    locations: snapshot,
+    loading: state.phase === 'idle' || state.phase === 'loading',
+    error: state.error,
+    retry: retryLoadLocations,
+  };
 }

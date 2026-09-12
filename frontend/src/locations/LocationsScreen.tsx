@@ -59,12 +59,11 @@ export default function LocationsScreen() {
   const { width } = useWindowDimensions();
   const router = useRouter();
 
-  const { locations, loading } = useLocationsStore();
+  // Supabase-backed: fetch failures surface here with a retry; every
+  // mutation is optimistic and rolls back on error (see ./store).
+  const { locations, loading, error, retry } = useLocationsStore();
   const { data: groups } = useActivityGroups();
   const { data: airEvents } = useAirEvents();
-  // Local records can't fail today; the branch is a real UI path for when
-  // the backend fetch lands.
-  const [error] = useState(false);
 
   const [addOpen, setAddOpen] = useState(false);
   const [editing, setEditing] = useState<Location | null>(null);
@@ -143,9 +142,9 @@ export default function LocationsScreen() {
               icon="alert-circle-outline"
               iconColor={COLOR.accent}
               title="Locations unavailable"
-              body="Check your connection and try again."
+              body={error}
               actionLabel="Try again"
-              onAction={() => {}}
+              onAction={retry}
             />
           ) : locations.length === 0 ? (
             <CenterState
@@ -212,7 +211,13 @@ export default function LocationsScreen() {
         location={removing}
         onClose={() => setRemoving(null)}
         onConfirm={() => {
-          if (removing) removeLocation(removing.id);
+          // Optimistic delete — on failure the store rolls the row back; the
+          // list simply keeps showing the location (nothing is faked).
+          if (removing) {
+            void removeLocation(removing.id).catch((e: unknown) => {
+              if (__DEV__) console.warn('[FireSight] Remove failed:', e);
+            });
+          }
           setRemoving(null);
         }}
       />

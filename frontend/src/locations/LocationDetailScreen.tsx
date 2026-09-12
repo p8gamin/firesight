@@ -200,7 +200,9 @@ export default function LocationDetailScreen() {
             </View>
           </View>
           <Text style={styles.title}>{location.name}</Text>
-          <Text style={styles.place}>{location.placeLabel}</Text>
+          {location.placeLabel ? (
+            <Text style={styles.place}>{location.placeLabel}</Text>
+          ) : null}
 
           {/* current activity read-out */}
           <View style={styles.activityRow}>
@@ -420,9 +422,16 @@ export default function LocationDetailScreen() {
         location={removing}
         onClose={() => setRemoving(null)}
         onConfirm={() => {
-          if (removing) removeLocation(removing.id);
+          // Optimistic delete; on failure the location stays and nothing is
+          // faked (the store rolls the row back and reports the error).
+          if (removing) {
+            void removeLocation(removing.id)
+              .then(() => router.back())
+              .catch((e: unknown) => {
+                if (__DEV__) console.warn('[FireSight] Remove failed:', e);
+              });
+          }
           setRemoving(null);
-          router.back();
         }}
       />
       <AddLocationModal

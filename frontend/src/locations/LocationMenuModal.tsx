@@ -34,6 +34,8 @@ export function LocationMenuModal({
   const isMd = width >= BP_MD;
   const [renaming, setRenaming] = useState(false);
   const [draft, setDraft] = useState('');
+  const [renameBusy, setRenameBusy] = useState(false);
+  const [renameError, setRenameError] = useState<string | null>(null);
 
   // Reset the rename input each time the menu opens for a location.
   const [lastKey, setLastKey] = useState<string | null>(null);
@@ -41,13 +43,28 @@ export function LocationMenuModal({
     setLastKey(location.id);
     setRenaming(false);
     setDraft(location.name);
+    setRenameError(null);
   }
 
-  const commitRename = useCallback(() => {
-    if (location && draft.trim()) updateLocation(location.id, { name: draft.trim() });
-    setRenaming(false);
-    onClose();
-  }, [location, draft, onClose]);
+  const commitRename = useCallback(async () => {
+    const name = draft.trim();
+    if (!location || !name || renameBusy) return;
+    setRenameBusy(true);
+    setRenameError(null);
+    try {
+      // Optimistic rename — persists `name` to saved_locations; rolls back
+      // and surfaces the error if Supabase rejects it.
+      await updateLocation(location.id, { name });
+      setRenaming(false);
+      onClose();
+    } catch (e) {
+      setRenameError(
+        e instanceof Error ? e.message : 'Could not rename the location.'
+      );
+    } finally {
+      setRenameBusy(false);
+    }
+  }, [location, draft, renameBusy, onClose]);
 
   if (!location) return null;
 
@@ -131,20 +148,25 @@ export function LocationMenuModal({
                   <Text style={styles.ghostText}>Cancel</Text>
                 </Pressable>
                 <Pressable
-                  onPress={commitRename}
-                  disabled={!draft.trim()}
+                  onPress={() => void commitRename()}
+                  disabled={!draft.trim() || renameBusy}
                   accessibilityRole="button"
                   accessibilityLabel="Save new name"
                   style={({ pressed }) => [
                     styles.renameBtn,
-                    !draft.trim() && { opacity: 0.4 },
-                    pressed && draft.trim() && { opacity: 0.85 },
+                    (!draft.trim() || renameBusy) && { opacity: 0.4 },
+                    pressed && draft.trim() && !renameBusy && { opacity: 0.85 },
                   ]}
                   {...webClass('lc-tap')}
                 >
-                  <Text style={styles.renameBtnText}>Save</Text>
+                  <Text style={styles.renameBtnText}>
+                    {renameBusy ? 'Saving…' : 'Save'}
+                  </Text>
                 </Pressable>
               </View>
+              {renameError ? (
+                <Text style={styles.renameError}>{renameError}</Text>
+              ) : null}
             </View>
           ) : (
             rows.map((r) => (
@@ -290,6 +312,15 @@ const styles = StyleSheet.create({
     paddingVertical: 9,
   },
   renameBtnText: { fontFamily: FONT.interSemiBold, fontSize: 13.5, color: '#fff' },
+  renameError: {
+    fontFamily: FONT.interRegular,
+    fontSize: 12.5,
+    lineHeight: 17,
+    color: '#E57B7B',
+    paddingHorizontal: 12,
+    paddingBottom: 4,
+    marginTop: 8,
+  },
 
   removeIcon: {
     width: 46,

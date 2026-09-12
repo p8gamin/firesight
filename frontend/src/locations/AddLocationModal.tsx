@@ -82,6 +82,8 @@ export default function AddLocationModal({
   const [locating, setLocating] = useState(false);
   const [locateError, setLocateError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   // Reset the flow each time it opens; prefill when editing.
   const openedFor = editing?.id ?? null;
@@ -92,6 +94,7 @@ export default function AddLocationModal({
     setQuery('');
     setLocateError(null);
     setSaved(false);
+    setSaveError(null);
     if (editing) {
       setPlace(placeFromPoint(editing.point, editing.placeLabel));
       setName(editing.name);
@@ -166,23 +169,39 @@ export default function AddLocationModal({
   const next = useCallback(() => setStep((s) => Math.min(s + 1, STEPS.length - 1)), []);
   const back = useCallback(() => setStep((s) => Math.max(s - 1, 0)), []);
 
-  const save = useCallback(() => {
-    if (!place) return;
-    const draft = {
-      name: name.trim() || 'My Place',
-      kind: editing?.kind ?? ('custom' as Location['kind']),
-      point: { lat: place.lat, lon: place.lon },
-      placeLabel: place.area ? `${place.name}, ${place.area}` : place.name,
-      radiusKm,
-      alertsEnabled: prefs.highConcern || prefs.moderate || prefs.newDetections,
-      monitors,
-      alertPrefs: prefs,
-    };
-    if (editing) updateLocation(editing.id, draft);
-    else addLocation(draft);
-    setSaved(true);
-    setTimeout(onClose, 450);
-  }, [place, name, editing, radiusKm, prefs, monitors, onClose]);
+  const save = useCallback(async () => {
+    if (!place || saving) return;
+    setSaveError(null);
+    setSaving(true);
+    try {
+      const draft = {
+        name: name.trim() || 'My Place',
+        kind: editing?.kind ?? ('custom' as Location['kind']),
+        point: { lat: place.lat, lon: place.lon },
+        placeLabel: place.area ? `${place.name}, ${place.area}` : place.name,
+        radiusKm,
+        alertsEnabled: prefs.highConcern || prefs.moderate || prefs.newDetections,
+        monitors,
+        alertPrefs: prefs,
+      };
+      if (editing) {
+        await updateLocation(editing.id, draft);
+      } else {
+        await addLocation(draft);
+      }
+      setSaved(true);
+      setTimeout(onClose, 450);
+    } catch (e) {
+      // Save failed — the store already rolled back; tell the user why.
+      setSaveError(
+        e instanceof Error
+          ? e.message
+          : 'Could not save the location. Please try again.'
+      );
+    } finally {
+      setSaving(false);
+    }
+  }, [place, name, editing, radiusKm, prefs, monitors, onClose, saving]);
 
   const label = editing ? 'Edit location' : 'Add Location';
   const panelWidth = isMd ? 520 : width - 20;
@@ -277,6 +296,23 @@ export default function AddLocationModal({
               )}
             </ScrollView>
 
+            {/* save error — shown in place, above the footer nav */}
+            {saveError ? (
+              <View style={styles.saveErrorRow}>
+                <Ionicons name="alert-circle" size={14} color="#E57B7B" />
+                <Text style={styles.saveErrorText}>{saveError}</Text>
+                <Pressable
+                  onPress={() => setSaveError(null)}
+                  hitSlop={8}
+                  accessibilityRole="button"
+                  accessibilityLabel="Dismiss error"
+                  style={({ pressed }) => pressed && { opacity: 0.6 }}
+                >
+                  <Ionicons name="close" size={14} color="#E57B7B" />
+                </Pressable>
+              </View>
+            ) : null}
+
             {/* footer nav */}
             <View style={styles.footer}>
               {step > 0 ? (
@@ -312,23 +348,26 @@ export default function AddLocationModal({
                 </Pressable>
               ) : (
                 <Pressable
-                  onPress={save}
+                  onPress={() => void save()}
+                  disabled={saved || saving}
                   accessibilityRole="button"
                   accessibilityLabel={editing ? 'Save changes' : 'Save location'}
                   style={({ pressed }) => [
                     styles.primaryBtn,
-                    saved && styles.primaryBtnSaved,
-                    pressed && !saved && { opacity: 0.85, transform: [{ scale: 0.99 }] },
+                    (saved || saving) && styles.primaryBtnSaved,
+                    pressed && !saved && !saving && { opacity: 0.85, transform: [{ scale: 0.99 }] },
                   ]}
                   {...webClass('lc-tap')}
                 >
-                  <Ionicons
-                    name={saved ? 'checkmark' : 'bookmark-outline'}
-                    size={15}
-                    color="#fff"
-                  />
+                  {saved ? (
+                    <Ionicons name="checkmark" size={15} color="#fff" />
+                  ) : saving ? (
+                    <ActivityIndicator size="small" color="#fff" />
+                  ) : (
+                    <Ionicons name="bookmark-outline" size={15} color="#fff" />
+                  )}
                   <Text style={styles.primaryText}>
-                    {saved ? 'Saved' : editing ? 'Save changes' : 'Save Location'}
+                    {saved ? 'Saved' : saving ? 'Saving…' : editing ? 'Save changes' : 'Save Location'}
                   </Text>
                 </Pressable>
               )}
@@ -1122,6 +1161,26 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingTop: 6,
+  },
+  saveErrorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginHorizontal: 20,
+    marginTop: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(229,123,123,0.35)',
+    backgroundColor: 'rgba(229,123,123,0.08)',
+  },
+  saveErrorText: {
+    flex: 1,
+    fontFamily: FONT.interRegular,
+    fontSize: 12.5,
+    lineHeight: 17,
+    color: '#E57B7B',
   },
   backBtn: { flexDirection: 'row', alignItems: 'center', gap: 2, paddingVertical: 12, paddingRight: 8 },
   backText: { fontFamily: FONT.interMedium, fontSize: 14, color: mapPalette.textMuted },

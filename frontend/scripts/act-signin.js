@@ -2,8 +2,8 @@
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
   const out = {};
 
-  // --- 1. Hero loads and the Get Started CTA exists ---
-  const cta = document.querySelector('.cd-flowbtn');
+  // --- 1. Hero loads and the Sign In/Up CTA exists ---
+  const cta = document.querySelector('.fs-auth-btn');
   out.ctaFound = !!cta;
   out.ctaText = cta ? (cta.textContent || '').trim() : null;
 

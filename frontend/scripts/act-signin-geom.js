@@ -2,8 +2,8 @@
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
   const out = {};
 
-  // Click Get Started from the hero.
-  const cta = document.querySelector('.cd-flowbtn');
+  // Click Sign In/Up from the hero.
+  const cta = document.querySelector('.fs-auth-btn');
   if (!cta) return { err: 'no cta' };
   cta.click();
   await wait(2500);

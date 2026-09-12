@@ -28,6 +28,10 @@ import { defaultAvatarUri, googleAvatarUrl } from '../lib/userDisplay';
  * "Profile" pill with the same styling once a Supabase session exists.
  * Native has no dropdown (the web twin owns that interaction) — tapping the
  * signed-in pill routes to /settings like the web dropdown's item.
+ *
+ * Inner order mirrors the web twin's Emerald UI trigger: text → profile
+ * image → dropdown arrow. Signed-out users get no image (text → arrow).
+ * The arrow is decorative here; the whole pill remains the tap target.
  */
 function ProfileButton() {
   const router = useRouter();
@@ -52,12 +56,13 @@ function ProfileButton() {
           pressed ? styles.pressedDim : null,
         ]}
       >
+        <Text style={styles.signUpText}>Profile</Text>
         <Image
           source={{ uri: avatarSrc }}
           style={styles.avatar}
           onError={() => avatarUrl && setFailedUrl(avatarUrl)}
         />
-        <Text style={styles.signUpText}>Profile</Text>
+        <Ionicons name="chevron-down" size={16} color={COLOR.gray900} />
       </Pressable>
     );
   }
@@ -72,8 +77,8 @@ function ProfileButton() {
         pressed ? styles.pressedDim : null,
       ]}
     >
-      <Ionicons name="arrow-forward" size={16} color={COLOR.gray900} />
       <Text style={styles.signUpText}>Sign In/Up</Text>
+      <Ionicons name="chevron-down" size={16} color={COLOR.gray900} />
     </Pressable>
   );
 }

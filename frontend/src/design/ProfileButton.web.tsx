@@ -1,36 +1,33 @@
 /**
- * ProfileButton (web only) — the top-right CTA of the hero nav.
+ * ProfileButton (web only) — the top-right auth CTA of the hero nav.
  *
- * Signed OUT → a plain pill that says "Sign In/Up" and routes to /signin.
- * Signed IN  → the same pill reads "Profile" and opens an animated dropdown
- * with two actions: Settings and Log Out.
+ * A faithful adaptation of the Emerald UI AnimatedDropdown (MIT,
+ * emerald-ui.com) provided as the design reference:
+ * - the outline `Button` trigger (rounded-md, h-10 px-4, text-sm
+ *   font-medium, border + background, hover accent) becomes a plain
+ *   <button> styled by `.fs-auth-btn` in designCss (this app ships no
+ *   Tailwind/shadcn, so the reference's dark zinc tokens live in CSS);
+ * - the same `useClickOutside` / `OnClickOutside` wrapper closes the menu;
+ * - the same AnimatePresence panel (opacity/y/scale, 0.2s easeOut, role
+ *   listbox) with the same staggered item reveal (0.03s, x: -20 → 0);
+ * - the same rotating ChevronDown (0.2s easeInOut).
  *
- * Dropdown adapted from the provided Emerald UI AnimatedDropdown (MIT,
- * emerald-ui.com): framer-motion open/exit + chevron rotation, staggered
- * item reveal, click-outside to close. Restyled into FireSight's dark
- * language (near-black surface, hairline borders, ember hover) instead of
- * Tailwind slate/zinc, and the generic shadcn Button is replaced with the
- * nav's existing `.cd-flowbtn` pill so the CTA reads exactly like the old
- * Get Started button. Session state comes from the shared AuthProvider.
- *
- * Item actions are callbacks (not links): Settings navigates to /settings,
- * Log Out calls Supabase signOut through the auth context.
+ * Differences required by FireSight:
+ * - item actions are callbacks, not links (Settings → /settings, Log Out →
+ *   Supabase signOut via the shared AuthProvider);
+ * - the trigger carries the signed-in avatar between the text and the
+ *   chevron (order: text → profile image → dropdown arrow); signed-out
+ *   users get the same button without the image;
+ * - session state comes from the shared AuthProvider — no new auth code.
  */
 import * as React from 'react';
 import { useRouter } from 'expo-router';
 import { AnimatePresence, motion } from 'motion/react';
-import { ChevronDown, LogOut, Settings } from 'lucide-react';
-import { FONT } from './constants';
+import { ChevronDown } from 'lucide-react';
 import { useAuth } from '../lib/AuthProvider';
 import { defaultAvatarUri, googleAvatarUrl } from '../lib/userDisplay';
 
-interface DropdownAction {
-  name: string;
-  icon: React.ReactNode;
-  onSelect: () => void;
-}
-
-/** Click-outside wrapper from the reference component (DOM events, web only). */
+/** Click-outside hook from the reference component (DOM events, web only). */
 function useClickOutside(ref: React.RefObject<HTMLElement | null>, handler: () => void) {
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -41,18 +38,20 @@ function useClickOutside(ref: React.RefObject<HTMLElement | null>, handler: () =
   }, [ref, handler]);
 }
 
+/** OnClickOutside wrapper from the reference component. */
 const OnClickOutside: React.FC<{
   children: React.ReactNode;
   onClickOutside: () => void;
 }> = ({ children, onClickOutside }) => {
   const wrapperRef = React.useRef<HTMLDivElement>(null);
   useClickOutside(wrapperRef, onClickOutside);
-  return (
-    <div ref={wrapperRef} style={{ display: 'inline-block' }}>
-      {children}
-    </div>
-  );
+  return <div ref={wrapperRef}>{children}</div>;
 };
+
+interface DropdownAction {
+  name: string;
+  onSelect: () => void;
+}
 
 export default function ProfileButton() {
   const router = useRouter();
@@ -67,10 +66,9 @@ export default function ProfileButton() {
   // avatar URL that fails to load) → the bundled default avatar.
   const avatarSrc = !avatarUrl || failedUrl === avatarUrl ? defaultAvatarUri() : avatarUrl;
 
-  const actions: DropdownAction[] = [
+  const items: DropdownAction[] = [
     {
       name: 'Settings',
-      icon: <Settings size={15} />,
       onSelect: () => {
         setIsOpen(false);
         router.push('/settings');
@@ -78,7 +76,6 @@ export default function ProfileButton() {
     },
     {
       name: 'Log Out',
-      icon: <LogOut size={15} />,
       onSelect: () => {
         setIsOpen(false);
         void signOut();
@@ -86,142 +83,76 @@ export default function ProfileButton() {
     },
   ];
 
-  const trigger = (
-    <button
-      type="button"
-      className="cd-flowbtn"
-      aria-haspopup="listbox"
-      aria-expanded={isOpen}
-      aria-label={signedIn ? 'Profile menu' : 'Sign in or sign up'}
-      onClick={() => {
-        if (signedIn) setIsOpen((v) => !v);
-        else router.push('/signin');
-      }}
-    >
-      {signedIn ? (
-        <img
-          src={avatarSrc}
-          alt=""
-          width={22}
-          height={22}
-          onError={() => avatarUrl && setFailedUrl(avatarUrl)}
-          style={{
-            width: 22,
-            height: 22,
-            borderRadius: '50%',
-            objectFit: 'cover',
-            position: 'relative',
-            zIndex: 1,
-            flexShrink: 0,
-          }}
-        />
-      ) : null}
-      <span className="cd-flowbtn-text" style={{ fontFamily: FONT.interSemiBold }}>
-        {signedIn ? 'Profile' : 'Sign In/Up'}
-      </span>
-      {signedIn ? (
-        <motion.span
-          style={{ position: 'relative', zIndex: 1, display: 'inline-flex' }}
-          animate={{ rotate: isOpen ? 180 : 0 }}
-          transition={{ duration: 0.2, ease: 'easeInOut' }}
-        >
-          <ChevronDown size={16} strokeWidth={2} />
-        </motion.span>
-      ) : null}
-    </button>
-  );
-
-  if (!signedIn) return trigger;
-
   return (
     <OnClickOutside onClickOutside={() => setIsOpen(false)}>
-      <div
-        data-state={isOpen ? 'open' : 'closed'}
-        style={{ position: 'relative', display: 'inline-block' }}
-      >
-        {trigger}
+      <div data-state={isOpen ? 'open' : 'closed'} style={{ position: 'relative', display: 'inline-block' }}>
+        {/* Trigger — the reference's outline Button. Inner order is fixed:
+            text → profile image (signed in only) → dropdown arrow. */}
+        <button
+          type="button"
+          className="fs-auth-btn"
+          aria-haspopup={signedIn ? 'listbox' : undefined}
+          aria-expanded={signedIn ? isOpen : undefined}
+          aria-label={signedIn ? 'Profile menu' : 'Sign in or sign up'}
+          onClick={() => {
+            if (signedIn) setIsOpen((v) => !v);
+            else router.push('/signin');
+          }}
+        >
+          <span>{signedIn ? 'Profile' : 'Sign In/Up'}</span>
+          {signedIn && avatarSrc ? (
+            <img
+              src={avatarSrc}
+              alt=""
+              width={20}
+              height={20}
+              onError={() => avatarUrl && setFailedUrl(avatarUrl)}
+              className="fs-auth-btn-avatar"
+            />
+          ) : null}
+          <motion.span
+            style={{ display: 'inline-flex' }}
+            animate={{ rotate: signedIn && isOpen ? 180 : 0 }}
+            transition={{ duration: 0.2, ease: 'easeInOut' }}
+          >
+            <ChevronDown size={20} strokeWidth={2} />
+          </motion.span>
+        </button>
 
         <AnimatePresence>
-          {isOpen && (
+          {signedIn && isOpen && (
             <motion.div
               role="listbox"
               aria-label="Profile actions"
+              /* Reference panel: opens below the trigger, centered on it.
+               left: 50% comes from .fs-auth-menu; motion composes the
+               translateX(-50%) with the enter/exit transforms. */
+              style={{ x: '-50%' }}
               initial={{ opacity: 0, y: -10, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.95 }}
               transition={{ duration: 0.2, ease: 'easeOut' }}
-              style={{
-                position: 'absolute',
-                top: 'calc(100% + 0.5rem)',
-                right: 0,
-                zIndex: 60,
-                minWidth: 180,
-                overflow: 'hidden',
-                borderRadius: 12,
-                background: '#161B22',
-                border: '1px solid #232B35',
-                boxShadow: '0 18px 40px -12px rgba(0,0,0,0.65)',
-              }}
+              className="fs-auth-menu"
             >
-              {/* Signed-in identity header — grounds "Profile" to the account. */}
-              <div
-                style={{
-                  padding: '10px 14px',
-                  borderBottom: '1px solid #232B35',
-                  color: '#9AA4AE',
-                  fontFamily: FONT.interMedium,
-                  fontSize: 12,
-                  letterSpacing: 0.3,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                  maxWidth: 200,
-                }}
-              >
-                {user?.email ?? 'FireSight account'}
-              </div>
-
               <motion.div
                 initial="hidden"
                 animate="visible"
                 variants={{ visible: { transition: { staggerChildren: 0.03 } } }}
               >
-                {actions.map((action) => (
+                {items.map((item) => (
                   <motion.button
-                    key={action.name}
+                    key={item.name}
                     type="button"
                     role="option"
                     aria-selected={false}
-                    onClick={action.onSelect}
+                    onClick={item.onSelect}
                     variants={{
                       hidden: { opacity: 0, x: -20 },
                       visible: { opacity: 1, x: 0 },
                     }}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 10,
-                      width: '100%',
-                      padding: '11px 14px',
-                      background: 'transparent',
-                      border: 'none',
-                      borderBottom: action.name === 'Settings' ? '1px solid #232B35' : 'none',
-                      color: '#F4F6F8',
-                      fontFamily: FONT.interMedium,
-                      fontSize: 14,
-                      textAlign: 'left',
-                      cursor: 'pointer',
-                      transition: 'background-color 150ms ease, color 150ms ease',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = '#1C232C';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'transparent';
-                    }}
+                    className="fs-auth-item"
                   >
-                    <span style={{ display: 'inline-flex', color: '#E8702A' }}>{action.icon}</span>
-                    {action.name}
+                    {item.name}
                   </motion.button>
                 ))}
               </motion.div>

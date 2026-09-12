@@ -14,8 +14,11 @@
  *   subscription fires → each location's fire data is requested (staggered).
  * - Data younger than FIRE_DATA_MAX_AGE_MS is reused; only stale locations
  *   are re-requested (e.g. when reopening the app or re-mounting screens).
- * - A fixed interval (FIRE_DATA_REFRESH_MS, 15 min) force-refreshes every
- *   location while the app is open — never a tight polling loop.
+ * - A fixed interval (FIRE_DATA_REFRESH_MS, 15 min) refreshes every location
+ *   while the app is open — never a tight polling loop. The interval runs at
+ *   module level, so it keeps working on any tab/screen, not just the map.
+ * - Returning to the app / tab (AppState 'active') catches up immediately if
+ *   the data went stale while the user was away or the tab was hidden.
  * - Adding/editing/removing a location re-syncs immediately (new or moved
  *   points fetch right away; removals drop their results).
  * - Sign-out clears everything back to idle (no cross-account leakage).
@@ -28,6 +31,7 @@
  * backend — this store only calls /fires.
  */
 import { useSyncExternalStore } from 'react';
+import { AppState } from 'react-native';
 import type { GeoPoint } from '../types';
 import { getFires, type FireActivityGroup } from './fireApi';
 import { supabase } from '../lib/supabase';
@@ -35,6 +39,9 @@ import {
   getLocationsSnapshot,
   subscribeToLocations,
 } from '../locations/store';
+
+/** Epoch ms of the last completed force-sync (interval/foreground catch-up). */
+let lastSyncAt = 0;
 
 /** Fixed refresh cadence while the app is open (15 minutes). */
 export const FIRE_DATA_REFRESH_MS = 15 * 60 * 1000;
@@ -262,7 +269,13 @@ function sync(force = false): void {
   }
 
   if (!refreshInterval) {
-    refreshInterval = setInterval(() => sync(true), FIRE_DATA_REFRESH_MS);
+    refreshInterval = setInterval(() => {
+      // Hidden-tab throttling (browsers) and native backgrounding can delay
+      // or coalesce timer ticks. Skip this tick if a tick just ran (< 1 min
+      // ago, e.g. the foreground catch-up), so requests never double up.
+      if (Date.now() - lastSyncAt < 60 * 1000) return;
+      sync(true);
+    }, FIRE_DATA_REFRESH_MS);
   }
 
   const now = Date.now();
@@ -283,6 +296,7 @@ function sync(force = false): void {
     stagger++;
   }
   recompute();
+  lastSyncAt = Date.now();
 }
 
 /** Clear everything back to idle (sign-out or no saved locations). */
@@ -312,6 +326,18 @@ subscribeToLocations(() => sync(false));
 supabase.auth.onAuthStateChange((event) => {
   if (event === 'SIGNED_OUT') resetData();
   else if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') sync(false);
+});
+
+// Foreground catch-up: native OSes pause JS timers while backgrounded and
+// browsers throttle timers in hidden tabs, so the 15-minute interval alone
+// can leave data older than the cadence after time away. When the app/tab
+// becomes active again, sync right away — freshness-aware, so only genuinely
+// stale locations are re-requested (fresh data = zero requests). Fires on
+// web tab switches too (react-native-web maps it to visibilitychange), which
+// is exactly the "switched away from/"back to a tab" case.
+AppState.addEventListener('change', (state) => {
+  if (state !== 'active') return;
+  sync(Date.now() - lastSyncAt >= FIRE_DATA_MAX_AGE_MS);
 });
 
 /** Kick off a freshness-aware load; safe to call from any screen effect. */

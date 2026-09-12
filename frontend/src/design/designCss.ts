@@ -536,6 +536,94 @@ body {
     transition: none !important;
   }
 }
+
+/* ================================================================
+ * Auth / profile trigger + dropdown (ProfileButton.web.tsx)
+ *
+ * Faithful translation of the Emerald UI AnimatedDropdown (MIT,
+ * emerald-ui.com) into plain CSS: its outline Button is the trigger
+ * (rounded-md, h-10 px-4, text-sm font-medium, border + background,
+ * hover:bg-accent) with an inline rotating ChevronDown, and the dropdown
+ * is its panel (rounded-md, top-[calc(100%+0.5rem)], centered, zinc-900
+ * surface, zinc-800 2px border, shadow-lg) with px-3 py-2 items separated
+ * by 2px borders that highlight on hover. The reference's dark-mode
+ * slate/zinc Tailwind tokens are used as literal values because this app
+ * ships no Tailwind; the panel's horizontal centering is applied by
+ * framer-motion (x: '-50%') so it composes with the motion transforms.
+ * ================================================================ */
+.fs-auth-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;                          /* h-10 */
+  padding: 8px 16px;                     /* px-4 py-2 */
+  border-radius: 6px;                    /* rounded-md */
+  border: 1px solid #27272a;             /* border-input (dark) */
+  background-color: rgba(24, 24, 27, 0.85); /* bg-background + blur over the hero photo */
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  color: #fafafa;                        /* text-foreground */
+  font-size: 14px;                       /* text-sm */
+  font-weight: 500;                      /* font-medium */
+  line-height: 20px;
+  cursor: pointer;
+  box-shadow: 0 4px 16px -6px rgba(0, 0, 0, 0.55);
+  transition: background-color 150ms ease, color 150ms ease;
+}
+.fs-auth-btn:hover {
+  background-color: #27272a;             /* hover:bg-accent (dark) */
+  color: #fafafa;                        /* hover:text-accent-foreground */
+}
+.fs-auth-btn:active { transform: scale(0.98); }
+.fs-auth-btn:focus-visible {
+  outline: 2px solid #d4d4d8;            /* focus-visible:ring-2 ring-offset-2 */
+  outline-offset: 2px;
+}
+.fs-auth-btn-avatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.fs-auth-menu {
+  position: absolute;
+  top: calc(100% + 0.5rem);              /* top-[calc(100%+0.5rem)] */
+  left: 50%;                             /* centered via motion x: '-50%' */
+  z-index: 50;
+  min-width: 100%;                       /* min-w-full */
+  overflow: hidden;                      /* overflow-hidden */
+  border-radius: 6px;                    /* rounded-md */
+  background-color: #18181b;             /* dark:bg-zinc-900 */
+  border: 2px solid #27272a;             /* border-2 dark:border-zinc-800 */
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.35),
+    0 4px 6px -4px rgba(0, 0, 0, 0.3);   /* shadow-lg */
+}
+.fs-auth-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 12px;                     /* px-3 py-2 */
+  background-color: #18181b;             /* dark:bg-zinc-900 */
+  border: none;
+  border-bottom: 2px solid #27272a;      /* border-b-2 dark:border-zinc-800 */
+  color: #fafafa;                        /* text-foreground */
+  font-size: 14px;                       /* text-sm */
+  line-height: 20px;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 150ms ease; /* transition-colors duration-150 */
+}
+.fs-auth-item:last-child { border-bottom: none; }   /* last:border-b-0 */
+.fs-auth-item:hover { background-color: #27272a; }  /* dark:hover:bg-zinc-800 */
+.fs-auth-item:focus-visible {
+  outline: 2px solid #d4d4d8;
+  outline-offset: -2px;
+}
 `;
 
 const STYLE_ID = 'motionsites-design-css';

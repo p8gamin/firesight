@@ -54,8 +54,7 @@ const HeadingArea = memo(function HeadingArea() {
             androidTight,
           ]}
         >
-          {'See '}
-          <Text style={{ color: COLOR.accent }}>{'Fire.'}</Text>
+          {'See Fire.'}
         </Text>
       </Entrance>
       <Entrance kind="reveal" delay={420} style={[styles.headingLine, { marginTop: -2 }]}>

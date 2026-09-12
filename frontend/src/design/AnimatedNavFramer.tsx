@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import LiquidGlassNavItem from './LiquidGlassNavItem';
 import ShinyBrand from './ShinyBrand';
+import { useAuth } from '../lib/AuthProvider';
 import { BP_MD, COLOR, COPY, FONT, NAV_ITEMS } from './constants';
 
 /**
@@ -20,11 +21,35 @@ import { BP_MD, COLOR, COPY, FONT, NAV_ITEMS } from './constants';
  * the old NavBar). The active pill is tracked the same way NavBar used to.
  */
 
-/** White "Get Started" pill with a forward arrow (md+). */
+/**
+ * White pill CTA (md+): "Get Started" → /signin when signed out; a
+ * "Sign Out" pill with the same styling once a Supabase session exists.
+ */
 function GetStartedButton() {
+  const router = useRouter();
+  const { session, signOut } = useAuth();
+
+  if (session) {
+    return (
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Sign out"
+        onPress={() => void signOut()}
+        style={({ pressed }: any) => [
+          styles.signUp,
+          pressed ? styles.pressedDim : null,
+        ]}
+      >
+        <Ionicons name="log-out-outline" size={16} color={COLOR.gray900} />
+        <Text style={styles.signUpText}>Sign Out</Text>
+      </Pressable>
+    );
+  }
+
   return (
     <Pressable
       accessibilityRole="button"
+      onPress={() => router.push('/signin')}
       style={({ pressed }: any) => [
         styles.signUp,
         pressed ? styles.pressedDim : null,

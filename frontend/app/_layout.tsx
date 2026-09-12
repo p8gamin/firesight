@@ -5,6 +5,7 @@ import { Stack } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useFonts } from 'expo-font';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { AuthProvider } from '../src/lib/AuthProvider';
 import {
   Inter_400Regular,
   Inter_500Medium,
@@ -16,7 +17,9 @@ import { PlayfairDisplay_400Regular_Italic } from '@expo-google-fonts/playfair-d
  * Root layout. Loads Inter (body) before the design renders, keeps the phone
  * UI chrome light, and hosts the routes: the hero landing (/), the FireSight
  * map (/map), and fire detail (/fire/[id]). GestureHandlerRootView is
- * required for the map's pan/pinch gestures.
+ * required for the map's pan/pinch gestures. AuthProvider hosts the
+ * Supabase session for the whole app (restored from AsyncStorage on
+ * startup, kept in sync via onAuthStateChange).
  */
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
@@ -34,14 +37,16 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={styles.root}>
       <SafeAreaProvider>
-        <StatusBar style="light" />
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            animation: 'fade',
-            contentStyle: { backgroundColor: '#000' },
-          }}
-        />
+        <AuthProvider>
+          <StatusBar style="light" />
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              animation: 'fade',
+              contentStyle: { backgroundColor: '#000' },
+            }}
+          />
+        </AuthProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

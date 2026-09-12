@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { usePathname, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import LiquidGlassNavItem from './LiquidGlassNavItem';
 import ShinyBrand from './ShinyBrand';
 import { useAuth } from '../lib/AuthProvider';
-import { BP_MD, COLOR, COPY, FONT, NAV_ITEMS } from './constants';
+import { BP_MD, COLOR, FONT, NAV_ITEMS } from './constants';
+import { defaultAvatarUri, googleAvatarUrl } from '../lib/userDisplay';
 
 /**
  * Animated floating nav (native).
@@ -17,31 +18,46 @@ import { BP_MD, COLOR, COPY, FONT, NAV_ITEMS } from './constants';
  * existing liquid-glass pills, always expanded and floating at the top
  * center (md+ — on phones the pills are hidden, matching the old NavBar).
  * The FireSight flame + wordmark stays at the top-left on every size, and
- * the white "Get Started" CTA sits at the top-right on md+ (both mirroring
- * the old NavBar). The active pill is tracked the same way NavBar used to.
+ * the white "Sign In/Up" / "Profile" CTA sits at the top-right on md+
+ * (mirroring the web twin's ProfileButton). The active pill is tracked the
+ * same way NavBar used to.
  */
 
 /**
- * White pill CTA (md+): "Get Started" → /signin when signed out; a
- * "Sign Out" pill with the same styling once a Supabase session exists.
+ * White pill CTA (md+): "Sign In/Up" → /signin when signed out; a
+ * "Profile" pill with the same styling once a Supabase session exists.
+ * Native has no dropdown (the web twin owns that interaction) — tapping the
+ * signed-in pill routes to /settings like the web dropdown's item.
  */
-function GetStartedButton() {
+function ProfileButton() {
   const router = useRouter();
-  const { session, signOut } = useAuth();
+  const { session, user } = useAuth();
+  // Remembers which Google URL failed so the default avatar takes over.
+  const [failedUrl, setFailedUrl] = useState<string | null>(null);
+
+  const avatarUrl = session ? googleAvatarUrl(user) : null;
+  // Google users → their Google avatar; email/password users (and any
+  // avatar URL that fails to load) → the bundled default avatar.
+  const avatarSrc =
+    !avatarUrl || failedUrl === avatarUrl ? defaultAvatarUri() : avatarUrl;
 
   if (session) {
     return (
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Sign out"
-        onPress={() => void signOut()}
+        accessibilityLabel="Profile"
+        onPress={() => router.push('/settings')}
         style={({ pressed }: any) => [
           styles.signUp,
           pressed ? styles.pressedDim : null,
         ]}
       >
-        <Ionicons name="log-out-outline" size={16} color={COLOR.gray900} />
-        <Text style={styles.signUpText}>Sign Out</Text>
+        <Image
+          source={{ uri: avatarSrc }}
+          style={styles.avatar}
+          onError={() => avatarUrl && setFailedUrl(avatarUrl)}
+        />
+        <Text style={styles.signUpText}>Profile</Text>
       </Pressable>
     );
   }
@@ -49,6 +65,7 @@ function GetStartedButton() {
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityLabel="Sign in or sign up"
       onPress={() => router.push('/signin')}
       style={({ pressed }: any) => [
         styles.signUp,
@@ -56,7 +73,7 @@ function GetStartedButton() {
       ]}
     >
       <Ionicons name="arrow-forward" size={16} color={COLOR.gray900} />
-      <Text style={styles.signUpText}>{COPY.nav.signUp}</Text>
+      <Text style={styles.signUpText}>Sign In/Up</Text>
     </Pressable>
   );
 }
@@ -110,7 +127,7 @@ export default function AnimatedNavFramer() {
           </View>
         ) : null}
         <View style={[styles.side, styles.sideEnd]}>
-          {isMd ? <GetStartedButton /> : null}
+          {isMd ? <ProfileButton /> : null}
         </View>
       </View>
     </View>
@@ -151,6 +168,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     color: COLOR.gray900,
+  },
+  avatar: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
   },
   pressedDim: { opacity: 0.7 },
   row: {

@@ -2,10 +2,10 @@ import * as React from 'react';
 import { createPortal } from 'react-dom';
 import { usePathname, useRouter } from 'expo-router';
 import { motion, useScroll, useMotionValueEvent, type Variants } from 'motion/react';
-import { ArrowRight, Menu } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { COLOR, COPY, FONT, NAV_ITEMS } from './constants';
 import ShinyBrand from './ShinyBrand';
-import { useAuth } from '../lib/AuthProvider';
+import ProfileButton from './ProfileButton.web';
 import {
   navCapsuleLink,
   navCapsuleLinks,
@@ -108,7 +108,6 @@ export default function AnimatedNavFramer() {
   const router = useRouter();
   const pathname = usePathname();
   const [isExpanded, setExpanded] = React.useState(true);
-  const { session, signOut } = useAuth();
 
   const goSection = (name: string) => {
     // Every section is a live route. dismissTo pops back to the existing
@@ -165,35 +164,12 @@ export default function AnimatedNavFramer() {
       <div className="cd-nav-brand" style={styles.brand}>
         <ShinyBrand />
       </div>
-      {/* Top-right CTA — white flow button: "Get Started" when signed out
-       * (opens /signin), "Sign Out" when a Supabase session exists. Same
-       * pill so the visual language is untouched. */}
+      {/* Top-right CTA — the ProfileButton pill: "Sign In/Up" when signed
+       * out (opens /signin), "Profile" with a Settings / Log Out dropdown
+       * once a Supabase session exists. Same flow-button pill as before so
+       * the visual language is untouched. */}
       <div className="cd-nav-cta" style={styles.cta}>
-        {session ? (
-          <button
-            type="button"
-            className="cd-flowbtn"
-            aria-label="Sign out"
-            onClick={() => void signOut()}
-          >
-            <span className="cd-flowbtn-text" style={{ fontFamily: FONT.interSemiBold }}>
-              Sign Out
-            </span>
-          </button>
-        ) : (
-          <button
-            type="button"
-            className="cd-flowbtn"
-            onClick={() => router.push('/signin')}
-          >
-            <ArrowRight className="cd-flowbtn-arrow cd-flowbtn-arrow-left" strokeWidth={2} />
-            <span className="cd-flowbtn-text" style={{ fontFamily: FONT.interSemiBold }}>
-              {COPY.nav.signUp}
-            </span>
-            <span className="cd-flowbtn-circle" />
-            <ArrowRight className="cd-flowbtn-arrow cd-flowbtn-arrow-right" strokeWidth={2} />
-          </button>
-        )}
+        <ProfileButton />
       </div>
       <div style={navCapsuleWrapper}>
         <motion.nav

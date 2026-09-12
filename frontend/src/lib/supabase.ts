@@ -29,10 +29,16 @@ if (!url || !key) {
 export const supabase = createClient(url, key, {
   auth: {
     storage: AsyncStorage,
+    // OAuth uses the PKCE flow: the session arrives as a one-time `?code=`
+    // that this client exchanges itself on return — no token in the URL
+    // (referrer/https upgrade-safe), and no server-side exchange needed.
+    flowType: 'pkce',
     // Web has multiple tabs; only one should poll for token refreshes.
     // (Detecting an SSR/document-less environment is enough here.)
     ...(typeof document !== 'undefined' ? {} : { autoRefreshToken: true }),
     persistSession: true,
+    // Consume `?code=…`/`#access_token=…` returned to any route (e.g.
+    // /auth/callback) at client-init time. Native has no URL to parse.
     detectSessionInUrl: typeof document !== 'undefined',
   },
 });

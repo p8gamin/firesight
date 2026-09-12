@@ -17,6 +17,7 @@ import Entrance from './Entrance';
 import { BG_IMAGE_1, COLOR, FONT } from './constants';
 import { isWeb } from './platform';
 import { supabase } from '../lib/supabase';
+import { getOAuthRedirectUrl } from '../lib/oauthRedirect';
 import { useAuth } from '../lib/AuthProvider';
 
 /**
@@ -198,9 +199,13 @@ function AuthForm({ mode, onToggleMode, onBack }: AuthFormProps) {
     }
     setBusy(true);
     try {
+      // Return to /auth/callback, where supabase-js detects the PKCE `code`,
+      // exchanges it for a session and the callback screen routes onward.
+      // Derived from the current origin — works on Vercel production, Vercel
+      // preview URLs and local `expo start --web` without hard-coding hosts.
       const { error: err } = await supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: { redirectTo: `${window.location.origin}/map` },
+        options: { redirectTo: getOAuthRedirectUrl() },
       });
       if (err) setError(friendlyAuthError(err));
     } finally {

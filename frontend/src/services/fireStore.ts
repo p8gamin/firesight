@@ -238,7 +238,7 @@ async function fetchLocation(locationId: string, point: GeoPoint): Promise<void>
     if (runTokens.get(locationId) !== token) return; // superseded
     const message =
       error instanceof Error ? error.message : 'Heat data is unavailable.';
-    if (__DEV__) console.warn('[FireSight] Heat data request failed:', message);
+    if (__DEV__) console.warn('[Ignova] Heat data request failed:', message);
     // Keep any previously fetched groups (stale-while-error) and back off.
     setEntry(locationId, {
       status: 'error',

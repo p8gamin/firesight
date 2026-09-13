@@ -1,11 +1,11 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLOR, FONT, GALLERY_ITEMS, STREAM_EXTRA_IMAGES } from './constants';
 import ImageStreamHero from './ImageStreamHero';
 
 /**
- * FireSight image gallery (native). The web twin (ScrollGallery.web.tsx)
+ * Ignova image gallery (native). The web twin (ScrollGallery.web.tsx)
  * uses a scroll-jack filmstrip driven by window scroll; native has no
  * document scroll, so this renders the same five image cards as a freely
  * scrolling horizontal ScrollView. No snapping while swiping — tapping a
@@ -20,6 +20,14 @@ export default function ScrollGallery() {
   const gap = 12;
   const imageH = Math.round(cardW * 0.9);
 
+  // Warm the image cache while the hero is still on screen, so the cards
+  // don't pop in blank/decode late during the first horizontal swipe.
+  useEffect(() => {
+    for (const item of GALLERY_ITEMS) {
+      if (item.image) Image.prefetch(item.image).catch(() => undefined);
+    }
+  }, []);
+
   const snapTo = (index: number) => {
     scrollRef.current?.scrollTo({ x: index * (cardW + gap), animated: true });
   };
@@ -30,7 +38,14 @@ export default function ScrollGallery() {
         ref={scrollRef}
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={[styles.row, { paddingRight: Math.max(24, width - cardW - 24) }]}
+        // Android: a horizontal scrollable nested inside the landing page's
+        // vertical ScrollView needs this, or the parent can win the gesture
+        // and the row feels stuck/unresponsive.
+        nestedScrollEnabled
+        contentContainerStyle={[
+          styles.row,
+          { paddingRight: Math.max(24, width - cardW - 24) },
+        ]}
       >
         {GALLERY_ITEMS.map((item, i) => (
           <Pressable
@@ -64,9 +79,9 @@ export default function ScrollGallery() {
         ))}
       </ScrollView>
 
-      {/* Outro: FireSight + byline above the ambient image stream. */}
+      {/* Outro: Ignova + byline above the ambient image stream. */}
       <ImageStreamHero images={STREAM_IMAGES}>
-        <Text style={styles.wordmark}>FireSight</Text>
+        <Text style={styles.wordmark}>Ignova</Text>
         <Text style={styles.byline}>A project by Krishnavivek Ivaturi.</Text>
       </ImageStreamHero>
     </View>

@@ -1,5 +1,5 @@
 /**
- * FireSight auth context — wraps Supabase Auth for the whole app.
+ * Ignova auth context — wraps Supabase Auth for the whole app.
  *
  * Responsibilities:
  * - Hold the current session/user and expose { session, user, loading, signOut, ... }.

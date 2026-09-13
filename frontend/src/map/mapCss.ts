@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { isWeb } from '../design/platform';
 
 /**
- * Web-only CSS for the FireSight map screen. Layout, colors and typography
+ * Web-only CSS for the Ignova map screen. Layout, colors and typography
  * live in RN style objects; this stylesheet adds the handful of effects RN
  * can't express: backdrop blur on glass surfaces, hover/brightness feedback,
  * grab cursor on the map canvas, and their reduced-motion / touch guards.
@@ -85,7 +85,7 @@ export const MAP_CSS = `
 }
 `;
 
-const STYLE_ID = 'firesight-map-css';
+const STYLE_ID = 'ignova-map-css';
 
 /** Injects MAP_CSS once into the document head (no-op on native). */
 export function useMapStyles() {

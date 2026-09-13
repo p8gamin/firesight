@@ -1,5 +1,5 @@
 /**
- * FireSight map geometry.
+ * Ignova map geometry.
  *
  * The basemap (see basemapData.ts) lives on a Web-Mercator "plane" of
  * WORLD_PX × WORLD_PX px covering the whole world (longitude −180..180).

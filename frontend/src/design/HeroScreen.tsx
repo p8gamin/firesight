@@ -1,7 +1,6 @@
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import {
   Image,
-  PanResponder,
   Platform,
   StyleSheet,
   Text,
@@ -25,7 +24,7 @@ const BaseImage = memo(function BaseImage() {
 });
 
 /**
- * FireSight headline — both lines set in Inter medium so the message reads
+ * Ignova headline — both lines set in Inter medium so the message reads
  * as one voice ("Before it Spreads" and "See Fire." share a font), with the
  * single word "Fire" carrying the ember accent. Type + palette follow the
  * Emil design-eng guidance: one neutral sans, near-monochrome with one
@@ -78,7 +77,7 @@ const HeadingArea = memo(function HeadingArea() {
 });
 
 /**
- * The FireSight hero — full-screen, dark, with a cursor spotlight that
+ * The Ignova hero — full-screen, dark, with a cursor spotlight that
  * reveals a second image through a soft circular mask. Mouse position is
  * smoothed with an exponential lerp driven by requestAnimationFrame.
  */
@@ -148,6 +147,26 @@ export default function HeroScreen() {
     };
   }, []);
 
+  // NATIVE — pointer-driven spotlight without hijacking the scroll.
+  //
+  // The previous implementation used a PanResponder that claimed the
+  // responder on EVERY touch (onStartShouldSetPanResponder: () => true).
+  // Inside the landing page's vertical ScrollView that made the hero steal
+  // every drag meant for the scroll, and each move re-ran the lerp loop +
+  // setState on the JS thread — the main source of the Android jank.
+  //
+  // Instead: capture the touch position once per touch START (a phase the
+  // scroll system never uses) and ease the spotlight there with a rAF loop
+  // that stops itself when settled. No move-phase tracking, no per-frame
+  // setState while scrolling, and vertical scrolling is untouched.
+  const touchStart = useCallback(
+    (e: { nativeEvent: { pageX: number; pageY: number } }) => {
+      if (isWeb) return;
+      handleMove(e.nativeEvent.pageX, e.nativeEvent.pageY);
+    },
+    [handleMove]
+  );
+
   // Warm the image cache on device so the masked SVG image decodes fast.
   useEffect(() => {
     if (isWeb) return;
@@ -169,21 +188,12 @@ export default function HeroScreen() {
     };
   }, []);
 
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: () => true,
-      onPanResponderGrant: (evt) =>
-        handleMove(evt.nativeEvent.pageX, evt.nativeEvent.pageY),
-      onPanResponderMove: (evt) =>
-        handleMove(evt.nativeEvent.pageX, evt.nativeEvent.pageY),
-    })
-  ).current;
-
   return (
     <View
       style={[styles.root, { width: winW, height: winH }]}
-      {...(isWeb ? {} : panResponder.panHandlers)}
+      // Touch-start only on native (see the note above the handler): it can
+      // never interfere with the parent ScrollView's drag gestures.
+      onTouchStart={touchStart}
     >
       <View style={styles.stage}>
         <BaseImage />

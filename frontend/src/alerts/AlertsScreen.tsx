@@ -42,7 +42,7 @@ const NAV_ROUTE: Record<string, string | null> = {
 };
 
 /**
- * The Alerts screen — FireSight's attention centre. Answers "what needs my
+ * The Alerts screen — Ignova's attention centre. Answers "what needs my
  * attention?": severity-labelled alert cards with a compact filter row
  * (All / Fire / Heat / Air Quality), inline expandable detail, and a direct
  * "View on Map" hop into the existing Map screen. Every value on screen
@@ -117,7 +117,10 @@ export default function AlertsScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[
           styles.scroll,
-          { paddingTop: isWeb ? 100 : insets.top + 96, paddingBottom: insets.bottom + 48 },
+          // Native phones now render the compact nav capsule (brand + pills
+          // + CTA), so the scroll content starts below it instead of at the
+          // old phones-had-no-navbar offset.
+          { paddingTop: isWeb ? 100 : insets.top + 132, paddingBottom: insets.bottom + 48 },
         ]}
       >
         <View style={[styles.content, compact && styles.contentCompact]}>
@@ -195,7 +198,7 @@ export default function AlertsScreen() {
               title={hasLocations ? 'No significant activity' : 'No locations monitored yet'}
               body={
                 hasLocations
-                  ? 'FireSight will show relevant activity here as it develops.'
+                  ? 'Ignova will show relevant activity here as it develops.'
                   : 'Save a location to start watching for heat anomalies around the places that matter to you.'
               }
               actionLabel={hasLocations ? 'View the map' : '+ Add a location'}

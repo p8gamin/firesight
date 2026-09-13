@@ -1,7 +1,7 @@
 /**
  * Backend → domain adapter.
  *
- * Maps the sanitized `FireActivityGroup[]` payloads from the FireSight
+ * Maps the sanitized `FireActivityGroup[]` payloads from the Ignova
  * backend onto the existing domain types in src/types (MapFire,
  * MapHeatRegion). The UI and its types don't change — this is the only
  * place that knows the backend field names.

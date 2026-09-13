@@ -26,7 +26,7 @@ import { supabase } from '../../src/lib/supabase';
 /** Milliseconds before the callback gives up and offers a manual escape. */
 const TIMEOUT_MS = 12_000;
 
-/** Dark styling copied from the app's tokens so this screen reads FireSight. */
+/** Dark styling copied from the app's tokens so this screen reads Ignova. */
 const BG = '#0B0E11';
 const BORDER = '#232B35';
 const TEXT = '#F4F6F8';
@@ -168,7 +168,7 @@ export default function AuthCallback() {
             <ActivityIndicator size="large" color={EMBER} />
             <Text style={styles.heading}>Signing you in…</Text>
             <Text style={styles.body}>
-              Restoring your FireSight session — one moment.
+              Restoring your Ignova session — one moment.
             </Text>
           </>
         )}

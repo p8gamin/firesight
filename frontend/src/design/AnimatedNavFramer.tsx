@@ -14,13 +14,12 @@ import { defaultAvatarUri, googleAvatarUrl } from '../lib/userDisplay';
  *
  * The web twin (AnimatedNavFramer.web.tsx) runs the framer-motion capsule
  * that collapses to a circle on scroll; native has no window scroll or
- * backdrop-filter, so this renders the same FireSight sections as the
+ * backdrop-filter, so this renders the same Ignova sections as the
  * existing liquid-glass pills, always expanded and floating at the top
- * center (md+ — on phones the pills are hidden, matching the old NavBar).
- * The FireSight flame + wordmark stays at the top-left on every size, and
- * the white "Sign In/Up" / "Profile" CTA sits at the top-right on md+
- * (mirroring the web twin's ProfileButton). The active pill is tracked the
- * same way NavBar used to.
+ * center. Below md the pills switch to a compact row (smaller type/padding)
+ * and the Ignova brand + Sign In/Up pill stay visible — this is what puts
+ * the navbar and the Sign In/Up CTA back on Android phones, which were
+ * previously rendered `null` below the 768px breakpoint (every phone).
  */
 
 /**
@@ -87,6 +86,10 @@ export default function AnimatedNavFramer() {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const isMd = width >= BP_MD;
+  // Compact pills on phones — the pills still render (they were previously
+  // dropped entirely below md), just smaller so five of them fit a phone
+  // alongside the brand and the Sign In/Up pill.
+  const compact = !isMd;
   const router = useRouter();
   const pathname = usePathname();
   const [activeNav, setActiveNav] = useState<string | null>(NAV_ITEMS[0].label);
@@ -111,15 +114,21 @@ export default function AnimatedNavFramer() {
   // never collides with them — the layout NavBar used.
   const y = insets.top + 24;
 
-  return (
-    <View style={[styles.wrap, { top: y }]}>
-      <View style={styles.fullRow}>
-        <View style={styles.side}>
-          {/* FireSight brand — logo + wordmark inside a shiny pill button
-           * (glass pill on native). Clicking returns to the hero. */}
-          <ShinyBrand />
-        </View>
-        {isMd ? (
+  // md+ (tablet / landscape): the single row — brand left, pills center,
+  // Sign In/Up right — exactly like the web twin. Below md (phones) the same
+  // elements stack in two rows: brand + Sign In/Up on top, five compact
+  // pills underneath. Rendering everything in one row on a 360dp phone does
+  // not fit; hiding the elements again would reintroduce the "navbar and
+  // Sign In/Up missing on Android" bug this screen exists to fix.
+  if (isMd) {
+    return (
+      <View style={[styles.wrap, { top: y }]}>
+        <View style={styles.fullRow}>
+          <View style={styles.side}>
+            {/* Ignova brand — logo + wordmark inside a shiny pill button
+             * (glass pill on native). Clicking returns to the hero. */}
+            <ShinyBrand />
+          </View>
           <View style={styles.row}>
             {NAV_ITEMS.map((item) => (
               <LiquidGlassNavItem
@@ -130,10 +139,32 @@ export default function AnimatedNavFramer() {
               />
             ))}
           </View>
-        ) : null}
-        <View style={[styles.side, styles.sideEnd]}>
-          {isMd ? <ProfileButton /> : null}
+          <View style={[styles.side, styles.sideEnd]}>
+            <ProfileButton />
+          </View>
         </View>
+      </View>
+    );
+  }
+
+  return (
+    <View style={[styles.wrap, { top: y }]} pointerEvents="box-none">
+      <View style={styles.stackRow} pointerEvents="box-none">
+        <View style={styles.side}>
+          <ShinyBrand />
+        </View>
+        <ProfileButton />
+      </View>
+      <View style={styles.stackPillsRow} pointerEvents="box-none">
+        {NAV_ITEMS.map((item) => (
+          <LiquidGlassNavItem
+            key={item.label}
+            label={item.label}
+            compact
+            active={activeNav === item.label}
+            onPress={() => handleNav(item.label)}
+          />
+        ))}
       </View>
     </View>
   );
@@ -185,5 +216,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
     paddingHorizontal: 4,
+  },
+  // Phone stack: row 1 = brand left + Sign In/Up right, row 2 = pills.
+  stackRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    marginBottom: 10,
+  },
+  stackPillsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 3,
   },
 });

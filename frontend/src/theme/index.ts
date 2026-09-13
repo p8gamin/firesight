@@ -1,5 +1,5 @@
 /**
- * Central design tokens — the FireSight visual language translated to
+ * Central design tokens — the Ignova visual language translated to
  * native. Dark, layered, calm; a single ember accent used sparingly.
  */
 
@@ -53,7 +53,7 @@ export const radius = {
 } as const;
 
 export const typography = {
-  // Display headings (tight, bold, sans — the FireSight voice)
+  // Display headings (tight, bold, sans — the Ignova voice)
   hero: { fontSize: 44, lineHeight: 42, fontWeight: '700' as const, letterSpacing: -2 },
   h1: { fontSize: 32, lineHeight: 36, fontWeight: '700' as const, letterSpacing: -1 },
   h2: { fontSize: 22, lineHeight: 27, fontWeight: '700' as const, letterSpacing: -0.4 },

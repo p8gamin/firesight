@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { isWeb } from '../design/platform';
 
 /**
- * Web-only CSS for the FireSight Locations screens (list, add/edit flow,
+ * Web-only CSS for the Ignova Locations screens (list, add/edit flow,
  * detail, activity sheet). Layout, colors and typography live in RN style
  * objects; this stylesheet adds the effects RN can't express: backdrop blur,
  * card hover lift, tap brightness, focus outlines — with touch + reduced
@@ -79,7 +79,7 @@ export const LOCATION_CSS = `
 }
 `;
 
-const STYLE_ID = 'firesight-locations-css';
+const STYLE_ID = 'ignova-locations-css';
 
 /** Injects LOCATION_CSS once into the document head (no-op on native). */
 export function useLocationStyles() {

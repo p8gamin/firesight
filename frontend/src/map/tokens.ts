@@ -1,5 +1,5 @@
 /**
- * FireSight map design tokens. The map is a dark, subdued command surface:
+ * Ignova map design tokens. The map is a dark, subdued command surface:
  * near-black ocean, slightly lifted land, hairline geography, and a single
  * ember accent reserved for fire/heat/attention. Mirrors the landing page's
  * palette (see src/design/constants.ts) so both feel like one product.

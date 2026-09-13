@@ -21,17 +21,17 @@ import { getOAuthRedirectUrl } from '../lib/oauthRedirect';
 import { useAuth } from '../lib/AuthProvider';
 
 /**
- * FireSight sign in / sign up screen (route: /signin).
+ * Ignova sign in / sign up screen (route: /signin).
  *
  * Real Supabase Auth: email + password sign up / sign in with loading,
  * validation and error states, correct email-confirmation handling, Google
  * OAuth on web, and a signed-in state (sign out) when a session exists.
  *
  * Adapted from the provided split-panel login page (image left, form right)
- * and restyled into the FireSight language instead of the generic blue
+ * and restyled into the Ignova language instead of the generic blue
  * template: dark image panel with the hero photography, and a dark form
  * panel on the app's own surfaces (near-black, hairline borders, one ember
- * accent) so both halves read as one continuous FireSight screen.
+ * accent) so both halves read as one continuous Ignova screen.
  * Inter throughout. The two
  * modes (Sign in / Sign up) live in one screen and swap via the link under
  * the heading — same intent as the original /signup navigation, without a
@@ -231,7 +231,7 @@ function AuthForm({ mode, onToggleMode, onBack }: AuthFormProps) {
           <Entrance kind="reveal" style={styles.headingWrap}>
             <Text style={styles.heading}>You're signed in</Text>
             <Text style={styles.subheading} numberOfLines={1}>
-              {session.user.email ?? 'FireSight account'}
+              {session.user.email ?? 'Ignova account'}
             </Text>
           </Entrance>
           <Entrance kind="fade" delay={60}>
@@ -240,7 +240,7 @@ function AuthForm({ mode, onToggleMode, onBack }: AuthFormProps) {
               onPress={() => router.replace('/map')}
               style={styles.submitBtn}
             >
-              <Text style={styles.submitText}>Continue to FireSight</Text>
+              <Text style={styles.submitText}>Continue to Ignova</Text>
             </Pressable>
             <Pressable
               accessibilityRole="button"
@@ -531,7 +531,7 @@ function AuthStackLayout(props: AuthFormProps) {
 }
 
 /**
- * Dark-theme palette for the form panel — mirrors src/theme (the FireSight
+ * Dark-theme palette for the form panel — mirrors src/theme (the Ignova
  * tokens) so the sign-in screen reads as part of the app: near-black
  * surfaces, hairline borders, muted text, one ember accent for the primary
  * action.

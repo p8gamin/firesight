@@ -5,7 +5,7 @@ import ScrollGallery from '../src/design/ScrollGallery';
 import { isWeb } from '../src/design/platform';
 
 /**
- * FireSight landing — the full-screen hero (fire-watch headline over a
+ * Ignova landing — the full-screen hero (fire-watch headline over a
  * spotlight photo), followed by the full-screen gallery section
  * (scroll-jack on web, paging swipe on native).
  * Wildfire functionality is intentionally not part of this screen.
@@ -25,7 +25,13 @@ export default function Index() {
     return content;
   }
   return (
-    <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+    <ScrollView
+      style={{ flex: 1 }}
+      showsVerticalScrollIndicator={false}
+      // Android: without this the outer vertical scroller can intercept the
+      // horizontal gallery's drag gestures, leaving the row unresponsive.
+      nestedScrollEnabled
+    >
       {content}
     </ScrollView>
   );

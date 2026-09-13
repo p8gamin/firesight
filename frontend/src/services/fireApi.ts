@@ -1,5 +1,5 @@
 /**
- * FireSight API service layer.
+ * Ignova API service layer.
  *
  * Every backend request the app makes goes through this module. The UI never
  * sees raw payloads: `getFires` validates the JSON defensively and returns a
@@ -9,7 +9,7 @@
 import { buildFiresUrl, FIRES_TIMEOUT_MS } from './config';
 
 // ---------------------------------------------------------------------------
-// Response types — mirror the FireSight backend's /fires payload 1:1
+// Response types — mirror the Ignova backend's /fires payload 1:1
 // ---------------------------------------------------------------------------
 
 export interface FireWeatherPayload {
@@ -220,24 +220,24 @@ export async function getFires(latitude: number, longitude: number): Promise<Fir
     });
   } catch {
     // Network failure, server down, or timeout.
-    throw new FireApiError('Cannot reach the FireSight backend.');
+    throw new FireApiError('Cannot reach the Ignova backend.');
   } finally {
     clearTimeout(timer);
   }
 
   if (!response.ok) {
-    throw new FireApiError(`The FireSight backend returned an error (${response.status}).`, response.status);
+    throw new FireApiError(`The Ignova backend returned an error (${response.status}).`, response.status);
   }
 
   let json: unknown;
   try {
     json = await response.json();
   } catch {
-    throw new FireApiError('The FireSight backend returned invalid JSON.');
+    throw new FireApiError('The Ignova backend returned invalid JSON.');
   }
 
   if (!Array.isArray(json)) {
-    throw new FireApiError('Unexpected response shape from the FireSight backend.');
+    throw new FireApiError('Unexpected response shape from the Ignova backend.');
   }
 
   return json

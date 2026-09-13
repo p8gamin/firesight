@@ -1,7 +1,7 @@
 /**
  * Data-access layer. The UI reads everything through these hooks.
  *
- * Alerts and activity groups are LIVE: they derive from the FireSight backend
+ * Alerts and activity groups are LIVE: they derive from the Ignova backend
  * response held in the fire store (src/services/fireStore), which requests
  * heat data around the user's primary saved location. Nothing is fabricated:
  * with no saved locations there are no groups and no alerts, and fields the

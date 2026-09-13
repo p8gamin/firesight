@@ -103,7 +103,10 @@ export default function LocationsScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[
           styles.scroll,
-          { paddingTop: isWeb ? 100 : insets.top + 96, paddingBottom: insets.bottom + 48 },
+          // Native phones now render the compact nav capsule (brand + pills
+          // + CTA), so the scroll content starts below it instead of at the
+          // old phones-had-no-navbar offset.
+          { paddingTop: isWeb ? 100 : insets.top + 132, paddingBottom: insets.bottom + 48 },
         ]}
       >
         <View style={[styles.content, compact && styles.contentCompact]}>
@@ -215,7 +218,7 @@ export default function LocationsScreen() {
           // list simply keeps showing the location (nothing is faked).
           if (removing) {
             void removeLocation(removing.id).catch((e: unknown) => {
-              if (__DEV__) console.warn('[FireSight] Remove failed:', e);
+              if (__DEV__) console.warn('[Ignova] Remove failed:', e);
             });
           }
           setRemoving(null);

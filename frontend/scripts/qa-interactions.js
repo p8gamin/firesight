@@ -46,14 +46,14 @@
   }
 
   // --- 3. Brand -> home --------------------------------------
-  const brand = document.querySelector('[aria-label*="FireSight"]');
+  const brand = document.querySelector('[aria-label*="Ignova"]');
   out.brandFound = !!brand;
   if (brand) {
     brand.click();
     await wait(1400);
     out.pathAfterBrand = location.pathname;
     const body = document.body.textContent || '';
-    out.heroH2 = /(See the smoke|Watch the fire|FireSight)/.test(body) ? 'unknown' : 'no';
+    out.heroH2 = /(See the smoke|Watch the fire|Ignova)/.test(body) ? 'unknown' : 'no';
     // hero detection: landing has distinctive copy
     out.bodySample = body.replace(/\s+/g, ' ').trim().slice(0, 150);
   }

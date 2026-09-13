@@ -16,7 +16,7 @@ import { PlayfairDisplay_400Regular_Italic } from '@expo-google-fonts/playfair-d
 
 /**
  * Root layout. Loads Inter (body) before the design renders, keeps the phone
- * UI chrome light, and hosts the routes: the hero landing (/), the FireSight
+ * UI chrome light, and hosts the routes: the hero landing (/), the Ignova
  * map (/map), and fire detail (/fire/[id]). GestureHandlerRootView is
  * required for the map's pan/pinch gestures. AuthProvider hosts the
  * Supabase session for the whole app (restored from AsyncStorage on

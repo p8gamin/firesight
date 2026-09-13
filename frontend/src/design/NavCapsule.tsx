@@ -14,25 +14,26 @@ export interface NavCapsuleProps {
 /**
  * Floating nav capsule (native twin of NavCapsule.web). Mirrors the hero's
  * native nav (AnimatedNavFramer.tsx): the same LiquidGlassNavItem pills in a
- * centered row at the same top offset, shown on md+ screens only — so the
- * map screen's navbar matches the hero page's navbar on every platform.
+ * centered row at the same top offset. On phones (< md) the pills render in
+ * a compact size instead of being hidden — this is what restores the
+ * floating navbar on Android phones (previously `null` below 768px, so the
+ * map/alerts/locations/about screens had no navbar at all).
  */
 export default function NavCapsule({ active, onNavigate }: NavCapsuleProps) {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const isMd = width >= BP_MD;
+  const compact = !isMd;
   const y = insets.top + 24;
-
-  // Hero native nav hides the pills below md (matching that behavior).
-  if (!isMd) return null;
 
   return (
     <View style={[styles.wrap, { top: y }]} pointerEvents="box-none">
-      <View style={styles.row}>
+      <View style={[styles.row, compact && styles.rowCompact]}>
         {NAV_ITEMS.map((item) => (
           <LiquidGlassNavItem
             key={item.label}
             label={item.label}
+            compact={compact}
             active={item.label === active}
             onPress={() => onNavigate?.(item.label)}
           />
@@ -55,5 +56,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
     paddingHorizontal: 4,
+  },
+  rowCompact: {
+    gap: 3,
+    paddingHorizontal: 0,
   },
 });

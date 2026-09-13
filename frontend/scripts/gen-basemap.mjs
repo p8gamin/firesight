@@ -1,5 +1,5 @@
 /**
- * Generates src/map/basemapData.ts — the FireSight North America basemap.
+ * Generates src/map/basemapData.ts — the Ignova North America basemap.
  *
  * Downloads Natural Earth admin_0 (countries) + admin_1 (states/provinces) +
  * lakes at 50m, splits rings that cross the ±180° seam, clips polygons to the
@@ -201,7 +201,7 @@ function toD(rings) {
 
 // ---------------------------------------------------------------------------
 async function fetchJson(url) {
-  const res = await fetch(url, { headers: { 'user-agent': 'firesight-basemap-gen' } });
+  const res = await fetch(url, { headers: { 'user-agent': 'ignova-basemap-gen' } });
   if (!res.ok) throw new Error(`${url} -> ${res.status}`);
   return res.json();
 }

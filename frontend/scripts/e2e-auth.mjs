@@ -1,5 +1,5 @@
 /**
- * Playwright e2e check for FireSight + Supabase auth (web).
+ * Playwright e2e check for Ignova + Supabase auth (web).
  *
  * Run:
  *   1. `npx expo start --web --port 8091` (leave running)
@@ -22,7 +22,7 @@ function check(name, ok, detail = '') {
   console.log(`${ok ? '✓ PASS' : '✗ FAIL'}  ${name}${detail ? ` — ${detail}` : ''}`);
 }
 
-const EMAIL = process.env.AUTH_TEST_EMAIL ?? `firesight.${Date.now()}@example.com`;
+const EMAIL = process.env.AUTH_TEST_EMAIL ?? `ignova.${Date.now()}@example.com`;
 const PASSWORD = 'TestPass!2345';
 const DO_SIGNUP = process.env.AUTH_TEST_SIGNUP === '1';
 
@@ -74,7 +74,7 @@ await page.getByText('Sign in', { exact: true }).first().click();
 await page.waitForTimeout(400);
 check('back in sign-in mode (Welcome Back)', await page.getByText('Welcome Back').first().isVisible());
 
-await page.getByPlaceholder('Email Address').fill('firesight.nobody@example.com');
+await page.getByPlaceholder('Email Address').fill('ignova.nobody@example.com');
 await page.getByPlaceholder('Password').fill('WrongPassword!123');
 await page.getByRole('button', { name: 'Sign In', exact: true }).click();
 const badPw = await page

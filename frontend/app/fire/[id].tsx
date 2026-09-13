@@ -18,7 +18,7 @@ import { COLOR, FONT } from '../../src/design/constants';
 /**
  * /fire/[id] — the detailed wildfire screen.
  *
- * Resolves the live wildfire record from the FireSight backend and lays
+ * Resolves the live wildfire record from the Ignova backend and lays
  * out the screen header/metadata. The loading and not-found states below
  * are unchanged.
  */
@@ -111,7 +111,7 @@ export default function FireDetailRoute() {
             <Text style={styles.placeholderTitle}>Full fire intelligence arrives with live data</Text>
             <Text style={styles.placeholderBody}>
               Growth projections, containment, air-quality outlook and evacuation context
-              will appear here once the FireSight backend is connected. The navigation
+              will appear here once the Ignova backend is connected. The navigation
               structure and record resolution are in place.
             </Text>
           </View>

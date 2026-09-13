@@ -7,8 +7,8 @@ import LiquidGlassNavItem from './LiquidGlassNavItem';
 import { BP_MD, BP_SM, COLOR, COPY, FONT, NAV_ITEMS } from './constants';
 import { isWeb, toWebStyle, webPillProps } from './platform';
 
-/** FireSight mark — ember flame, the single accent of the palette. */
-export function FireSightMark() {
+/** Ignova mark — ember flame, the single accent of the palette. */
+export function IgnovaMark() {
   return <Ionicons name="flame" size={24} color={COLOR.accent} />;
 }
 
@@ -116,7 +116,7 @@ export default function NavBar() {
   const rowContent = isMd ? (
     <View style={styles.row}>
       <View style={styles.leftFill}>
-        <FireSightMark />
+        <IgnovaMark />
         <Text style={styles.wordmark}>{COPY.wordmark}</Text>
       </View>
       <CenterPill activeNav={activeNav} onActive={setActiveNav} />
@@ -127,7 +127,7 @@ export default function NavBar() {
   ) : (
     <View style={[styles.row, styles.rowBetween]}>
       <View style={styles.leftCluster}>
-        <FireSightMark />
+        <IgnovaMark />
         <Text style={styles.wordmark}>{COPY.wordmark}</Text>
       </View>
       <MobileMenuButton />

@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 import { COLOR, FONT } from './constants';
 
 /**
- * The top-left FireSight brand as a shiny pill button (native twin of
+ * The top-left Ignova brand as a shiny pill button (native twin of
  * ShinyBrand.web). The web version gets the animated conic shine via CSS;
  * native approximates the same intent with layered translucency: a deep
  * forest-green gradient base, a subtle orange ring, and a top-lit sheen —
@@ -18,7 +18,7 @@ export default function ShinyBrand() {
     <Pressable
       onPress={() => router.dismissTo('/')}
       accessibilityRole="button"
-      accessibilityLabel="FireSight — back to home"
+      accessibilityLabel="Ignova — back to home"
       style={({ pressed }) => [pressed && styles.pressed]}
     >
       <LinearGradient
@@ -40,7 +40,7 @@ export default function ShinyBrand() {
           style={styles.logo}
           resizeMode="contain"
         />
-        <Text style={styles.wordmark}>{'FireSight'}</Text>
+        <Text style={styles.wordmark}>{'Ignova'}</Text>
       </LinearGradient>
     </Pressable>
   );

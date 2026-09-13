@@ -183,7 +183,9 @@ export default function LocationDetailScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[
           styles.scroll,
-          { paddingBottom: insets.bottom + 48 },
+          // Native phones now show the compact nav capsule below the Topbar,
+          // so the content starts a little lower there.
+          { paddingBottom: insets.bottom + 48, paddingTop: isWeb ? undefined : 44 },
         ]}
       >
         <View style={[styles.content, compact && styles.contentCompact]}>
@@ -325,7 +327,7 @@ export default function LocationDetailScreen() {
               </View>
               <Text style={styles.quietTitle}>No significant activity</Text>
               <Text style={styles.quietBody}>
-                FireSight hasn't detected notable activity around this location during the
+                Ignova hasn't detected notable activity around this location during the
                 selected period.
               </Text>
             </View>
@@ -386,7 +388,7 @@ export default function LocationDetailScreen() {
       <View
         style={[
           styles.chrome,
-          { paddingTop: isWeb ? (width < 768 ? 84 : 24) : 0 },
+          { paddingTop: isWeb ? (width < 768 ? 84 : 24) : insets.top + 48 },
         ]}
         pointerEvents="box-none"
       >
@@ -428,7 +430,7 @@ export default function LocationDetailScreen() {
             void removeLocation(removing.id)
               .then(() => router.back())
               .catch((e: unknown) => {
-                if (__DEV__) console.warn('[FireSight] Remove failed:', e);
+                if (__DEV__) console.warn('[Ignova] Remove failed:', e);
               });
           }
           setRemoving(null);

@@ -17,8 +17,8 @@ import {
  * Animated floating nav (web only).
  *
  * The framer-motion capsule nav: a frosted pill floating at the top center
- * with the five FireSight sections (Home, Map, Alerts, Locations, About),
- * plus the FireSight flame + wordmark kept at the top-left and the white
+ * with the five Ignova sections (Home, Map, Alerts, Locations, About),
+ * plus the Ignova flame + wordmark kept at the top-left and the white
  * "Get Started" CTA kept at the top-right of the page. Scrolling down past
  * 150px collapses the pill to a small circle showing only the menu icon;
  * scrolling back up by EXPAND_SCROLL_THRESHOLD expands it again. Clicking
@@ -159,7 +159,7 @@ export default function AnimatedNavFramer() {
 
   const nav = (
     <>
-      {/* FireSight brand — logo + wordmark inside a shiny pill button,
+      {/* Ignova brand — logo + wordmark inside a shiny pill button,
        * fixed at the top-left (md+). Clicking returns to the hero. */}
       <div className="cd-nav-brand" style={styles.brand}>
         <ShinyBrand />

@@ -49,7 +49,7 @@ const NAV_ROUTE: Record<string, string | null> = {
   About: '/about',
 };
 
-/** FireSight locate framing: ~90 px per degree of longitude (plane scale). */
+/** Ignova locate framing: ~90 px per degree of longitude (plane scale). */
 const LOCATE_SCALE = (90 * 360) / WORLD_PX;
 
 /**
@@ -319,7 +319,7 @@ export default function MapScreen() {
            * (the hero hides it so the centered capsule never collides). */}
           {!isWeb || width >= BP_MD ? (
             <View style={styles.brandRow} pointerEvents="box-none">
-              {/* The FireSight brand — logo + wordmark inside a shiny pill
+              {/* The Ignova brand — logo + wordmark inside a shiny pill
                * button (web: animated conic shine; native: glass pill). */}
               <ShinyBrand />
             </View>
@@ -806,7 +806,7 @@ function GetStartedCard({ width, onCreate }: { width: number; onCreate: () => vo
         <View style={styles.getStartedText}>
           <Text style={styles.getStartedTitle}>Create a location to get started</Text>
           <Text style={styles.cardSub}>
-            FireSight watches for heat anomalies around the places you save. Add your
+            Ignova watches for heat anomalies around the places you save. Add your
             first location and its area is monitored live on this map.
           </Text>
         </View>

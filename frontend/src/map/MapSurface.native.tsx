@@ -1,9 +1,9 @@
 /**
  * Native map surface — react-native-maps (Expo SDK 57).
  *
- * The interactive map layer behind the FireSight Map screen on iOS/Android:
+ * The interactive map layer behind the Ignova Map screen on iOS/Android:
  * Google Maps on Android, Apple Maps on iOS (dark-styled), full pan/pinch,
- * FireSight-styled markers coloured by Concern Score category, soft heat
+ * Ignova-styled markers coloured by Concern Score category, soft heat
  * circles, WFIGS perimeter polygons when the backend serves geometry, and
  * the teal user-location dot.
  *
@@ -42,7 +42,7 @@ import type {
 // ---------------------------------------------------------------------------
 // Camera unit conversion
 //
-// FireSight speaks "plane scale" (screen px per plane px; the plane is
+// Ignova speaks "plane scale" (screen px per plane px; the plane is
 // WORLD_PX across). Google/Apple zoom levels express the same thing as
 // 256·2^z screen px across the whole world.
 // ---------------------------------------------------------------------------
@@ -185,7 +185,7 @@ const FireMarker = React.memo(function FireMarker({
 });
 
 // ---------------------------------------------------------------------------
-// User location dot (FireSight teal — same visual as the web billboard)
+// User location dot (Ignova teal — same visual as the web billboard)
 // ---------------------------------------------------------------------------
 
 const UserDotMarker = React.memo(function UserDotMarker({
@@ -301,7 +301,7 @@ const MapSurface = forwardRef<MapSurfaceHandle, MapSurfaceProps>(function MapSur
   const { width, height } = useWindowDimensions();
   const mapRef = useRef<MapView | null>(null);
 
-  // Initial framing: the FireSight "locate" scale (~90 px/deg) around the
+  // Initial framing: the Ignova "locate" scale (~90 px/deg) around the
   // current request origin (backend default until the device fix arrives).
   const initialRegion = useMemo(() => {
     const scale = (90 * 360) / WORLD_PX;

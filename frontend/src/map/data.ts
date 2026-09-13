@@ -1,7 +1,7 @@
 /**
  * Map data access. The Map screen reads every record through this module.
  *
- * All data is LIVE: wildfire/heat activity comes from the FireSight backend
+ * All data is LIVE: wildfire/heat activity comes from the Ignova backend
  * (src/services) — requested around the user's primary saved location. There
  * is no sample fallback: with no backend response the map simply shows no
  * markers (plus the retry banner), and with no saved locations the store

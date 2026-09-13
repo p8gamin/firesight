@@ -1,5 +1,5 @@
 /**
- * FireSight's Supabase client (authentication only for now).
+ * Ignova's Supabase client (authentication only for now).
  *
  * Credentials come from Expo public env vars, inlined at bundle time
  * (see .env.example). Only the anon/publishable key belongs here — it is a
@@ -19,10 +19,21 @@ const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const key = process.env.EXPO_PUBLIC_SUPABASE_KEY;
 
 if (!url || !key) {
+  // EAS builds run on Expo's servers where the local `.env` file is NOT
+  // uploaded — EXPO_PUBLIC_* values must be provided with `eas secret:create`
+  // (or `eas env:create` / the env passed to the build command), otherwise
+  // every screen that imports this module crashes on launch.
+  const isEas = !!process.env.EAS_BUILD_ID;
   throw new Error(
-    'Supabase is not configured. Set EXPO_PUBLIC_SUPABASE_URL and ' +
-      'EXPO_PUBLIC_SUPABASE_KEY in .env (see .env.example), then restart ' +
-      '`expo start` so Expo re-inlines them.'
+    isEas
+      ? 'Supabase is not configured for this EAS build. Run\n' +
+          '  eas secret:create --name EXPO_PUBLIC_SUPABASE_URL --value <url>\n' +
+          '  eas secret:create --name EXPO_PUBLIC_SUPABASE_KEY --value <anon-key>\n' +
+        '(or `eas env:create` with the same names) and rebuild. Never use ' +
+        'the service-role key here.'
+      : 'Supabase is not configured. Set EXPO_PUBLIC_SUPABASE_URL and ' +
+        'EXPO_PUBLIC_SUPABASE_KEY in .env (see .env.example), then restart ' +
+        '`expo start` so Expo re-inlines them.'
   );
 }
 

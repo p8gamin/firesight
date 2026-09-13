@@ -2,7 +2,7 @@ import * as React from 'react';
 
 /* ── the corridor ────────────────────────────────────────────────
  * Adapted from the ImageStreamHero (shadcn paste-in) component into the
- * FireSight web-twin pattern: same fitted geometry and keyframe math, raw
+ * Ignova web-twin pattern: same fitted geometry and keyframe math, raw
  * DOM + inline CSS (no Tailwind/cn) so it runs inside the Expo RN web app.
  *
  * Two rails of cards ride from far behind the screen toward the viewer.
@@ -89,7 +89,7 @@ export type ImageStreamHeroProps = {
   /** Vertical placement of the corridor's axis, as a percentage of height. */
   axis?: number;
   path?: CorridorPath;
-  /** Content rendered above the corridor (e.g. the FireSight outro text). */
+  /** Content rendered above the corridor (e.g. the Ignova outro text). */
   children?: React.ReactNode;
   className?: string;
   style?: React.CSSProperties;

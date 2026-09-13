@@ -3,11 +3,11 @@
  * no Google Maps, no API key, no billing.
  *
  * Real OSM roads/streets/cities, smooth pan + zoom, built-in zoom control,
- * a FireSight-styled fullscreen control, the required OpenStreetMap
+ * a Ignova-styled fullscreen control, the required OpenStreetMap
  * attribution, and automatic resize handling (ResizeObserver).
  *
- * Markers are FireSight-styled divIcons driven entirely by the app's live
- * data — wildfire activity groups from the FireSight backend (clustered via
+ * Markers are Ignova-styled divIcons driven entirely by the app's live
+ * data — wildfire activity groups from the Ignova backend (clustered via
  * leaflet.markercluster) and saved locations from the app's locations store.
  * Markers diff by id, so data changes add/update/remove them live.
  *
@@ -37,14 +37,14 @@ import type {
 } from './mapSurfaceTypes';
 
 // ---------------------------------------------------------------------------
-// Camera unit conversion (FireSight plane scale ↔ Leaflet zoom level)
+// Camera unit conversion (Ignova plane scale ↔ Leaflet zoom level)
 // ---------------------------------------------------------------------------
 
 function zoomForScale(scale: number): number {
   return Math.log2((scale * WORLD_PX) / 256);
 }
 
-/** FireSight locate framing (~90 px per degree of longitude) as a Leaflet zoom. */
+/** Ignova locate framing (~90 px per degree of longitude) as a Leaflet zoom. */
 const LOCATE_ZOOM = Math.round(zoomForScale((90 * 360) / WORLD_PX) * 10) / 10;
 
 type Marker = L.Marker;
@@ -67,7 +67,7 @@ const CATEGORY_SIZES = {
   high: { dot: 9, halo: 26, haloOpacity: 0.32, hot: 3.8 },
 } as const;
 
-/** FireSight fire-marker grammar: soft halo + category dot + hot core. */
+/** Ignova fire-marker grammar: soft halo + category dot + hot core. */
 function buildFireContent(
   fire: MapFire,
   category: ReturnType<typeof fireSeverity>,
@@ -78,7 +78,7 @@ function buildFireContent(
   const sizes = CATEGORY_SIZES[category];
 
   const box = el('div', { width: '44px', height: '44px', position: 'relative' });
-  box.setAttribute('data-firesight', 'fire-marker');
+  box.setAttribute('data-ignova', 'fire-marker');
   box.setAttribute('data-category', category);
   box.setAttribute('data-fire-id', fire.id);
   box.setAttribute('data-lat', String(fire.point.lat));
@@ -170,7 +170,7 @@ function buildLocationContent(loc: Location, selected: boolean): HTMLElement {
   // 44 wide × 64 tall: a name pill (top ~20px) above the badge; the icon
   // anchor points at the badge centre (y = 20 + 22 = 42).
   const box = el('div', { width: '44px', height: '64px', position: 'relative' });
-  box.setAttribute('data-firesight', 'location-marker');
+  box.setAttribute('data-ignova', 'location-marker');
   box.setAttribute('data-location-id', loc.id);
   box.setAttribute('data-name', loc.name);
   box.title = loc.name;
@@ -245,10 +245,10 @@ function buildLocationContent(loc: Location, selected: boolean): HTMLElement {
   return box;
 }
 
-/** The user's own position — FireSight teal rings. */
+/** The user's own position — Ignova teal rings. */
 function buildUserDotContent(): HTMLElement {
   const box = el('div', { width: '24px', height: '24px', position: 'relative' });
-  box.setAttribute('data-firesight', 'user-dot');
+  box.setAttribute('data-ignova', 'user-dot');
   box.appendChild(
     el('div', {
       position: 'absolute',
@@ -290,7 +290,7 @@ function buildClusterContent(count: number): HTMLElement {
     textShadow: '0 1px 2px rgba(0,0,0,0.45)',
     boxShadow: '0 1px 6px rgba(0,0,0,0.3)',
   });
-  box.setAttribute('data-firesight', 'fire-cluster');
+  box.setAttribute('data-ignova', 'fire-cluster');
   box.appendChild(document.createTextNode(String(count)));
   return box;
 }

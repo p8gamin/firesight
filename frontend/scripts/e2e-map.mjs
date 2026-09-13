@@ -56,7 +56,7 @@ async function runAddLocationFlow(page, search, name) {
 }
 
 const storedLocations = (page) =>
-  page.evaluate(() => JSON.parse(localStorage.getItem('firesight.locations.v1') ?? '[]'));
+  page.evaluate(() => JSON.parse(localStorage.getItem('ignova.locations.v1') ?? '[]'));
 
 const browser = await chromium.launch({ channel: 'chrome', headless: true });
 
@@ -85,9 +85,9 @@ try {
 
   // ---- Empty start: no fake data, get-started prompt takes over ----
   await page.waitForTimeout(1500); // allow any (there should be none) data to land
-  const fireMarkersBefore = await page.locator('[data-firesight="fire-marker"]').count();
+  const fireMarkersBefore = await page.locator('[data-ignova="fire-marker"]').count();
   check('No heat-anomaly markers without a saved location (no fake data)', fireMarkersBefore === 0, `${fireMarkersBefore} found`);
-  const locMarkersBefore = await page.locator('[data-firesight="location-marker"]').count();
+  const locMarkersBefore = await page.locator('[data-ignova="location-marker"]').count();
   check('No saved-location markers before the user creates one', locMarkersBefore === 0, `${locMarkersBefore} found`);
   await page.getByText('Create a location to get started').first().waitFor({ timeout: 8000 });
   check('Get-started prompt shown when no locations exist', true);
@@ -195,7 +195,7 @@ try {
 
   await navTo(page, 'Map');
   await page.waitForTimeout(1200);
-  const locCountAfterDelete = await page.locator('[data-firesight="location-marker"]').count();
+  const locCountAfterDelete = await page.locator('[data-ignova="location-marker"]').count();
   check('Marker disappears after deleting the location', locCountAfterDelete === 0, `${locCountAfterDelete} left`);
   const promptBack = await page.getByText('Create a location to get started').count();
   check('Get-started prompt returns when the last location is removed', promptBack > 0);
@@ -223,9 +223,9 @@ try {
   }
   // Clean up the geocode-test location to leave the store tidy.
   await page.evaluate(() => {
-    const list = JSON.parse(localStorage.getItem('firesight.locations.v1') ?? '[]');
+    const list = JSON.parse(localStorage.getItem('ignova.locations.v1') ?? '[]');
     localStorage.setItem(
-      'firesight.locations.v1',
+      'ignova.locations.v1',
       JSON.stringify(list.filter((l) => l.name !== 'Nominatim Test'))
     );
   });

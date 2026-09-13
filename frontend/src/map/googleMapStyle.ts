@@ -1,5 +1,5 @@
 /**
- * Google Maps dark styling for the FireSight map (Android / iOS-Google).
+ * Google Maps dark styling for the Ignova map (Android / iOS-Google).
  * Mirrors the bespoke basemap palette in ./tokens: near-black water,
  * slightly lifted land, hairline geography, faint labels — a subdued command
  * surface that keeps the ember accent reserved for fire itself.

@@ -24,7 +24,7 @@ const NAV_ROUTE: Record<string, string | null> = {
 const VERSION = '1.0.0';
 
 /**
- * The About screen — \"Understand FireSight.\" A calm, typography-led
+ * The About screen — \"Understand Ignova.\" A calm, typography-led
  * explanation of the product: what it is, how it combines satellite
  * detections with official incident + environmental data, the Concern Score
  * at a high level, what it monitors, the mission, and an honest disclaimer.
@@ -55,20 +55,23 @@ export default function AboutScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[
           styles.scroll,
-          { paddingTop: isWeb ? 100 : insets.top + 96, paddingBottom: insets.bottom + 48 },
+          // Native phones now render the compact nav capsule (brand + pills
+          // + CTA), so the scroll content starts below it instead of at the
+          // old phones-had-no-navbar offset.
+          { paddingTop: isWeb ? 100 : insets.top + 132, paddingBottom: insets.bottom + 48 },
         ]}
       >
         <View style={[styles.content, compact && styles.contentCompact]}>
           {/* ============================ header ============================ */}
           <View style={styles.header}>
             <Text style={styles.title}>About</Text>
-            <Text style={styles.subtitle}>Understand FireSight.</Text>
+            <Text style={styles.subtitle}>Understand Ignova.</Text>
           </View>
 
           {/* ============================ intro ============================= */}
           <View style={styles.lead}>
             <Text style={styles.leadText}>
-              FireSight is a wildfire monitoring and intelligence tool. It brings satellite
+              Ignova is a wildfire monitoring and intelligence tool. It brings satellite
               detections, official incident information, weather and air-quality data together
               so you can understand what's burning — and what's at risk around the places you
               care about.
@@ -76,9 +79,9 @@ export default function AboutScreen() {
           </View>
 
           {/* ========================= how it works ========================= */}
-          <Section index={1} title="How FireSight Works">
+          <Section index={1} title="How Ignova Works">
             <Text style={styles.para}>
-              FireSight combines several kinds of information into one view. Satellites detect
+              Ignova combines several kinds of information into one view. Satellites detect
               heat on the ground; those detections are grouped into activity events and scored
               by proximity, recency and repeat observations. Official incident and perimeter
               records add context where they exist, and weather + air-quality feeds describe
@@ -94,7 +97,7 @@ export default function AboutScreen() {
           {/* ========================= data sources ========================= */}
           <Section index={2} title="Data Sources">
             <Text style={styles.para}>
-              FireSight is built on the following sources:
+              Ignova is built on the following sources:
             </Text>
             <View style={styles.sourceList}>
               <SourceRow
@@ -115,7 +118,7 @@ export default function AboutScreen() {
               <SourceRow
                 icon="leaf-outline"
                 name="Air-quality data"
-                detail="PM2.5 and AQI readings for the areas FireSight monitors."
+                detail="PM2.5 and AQI readings for the areas Ignova monitors."
               />
             </View>
           </Section>
@@ -125,7 +128,7 @@ export default function AboutScreen() {
             <View style={styles.scoreBlock}>
               <Text style={styles.scoreValue}>0–100</Text>
               <Text style={styles.para}>
-                The Concern Score is FireSight's single measure of how much an activity event
+                The Concern Score is Ignova's single measure of how much an activity event
                 deserves your attention. It weighs how close the activity is to places you
                 monitor, how recently it was detected, and how consistently satellites have
                 observed it. Higher scores mean higher concern — but it is a monitoring aid,
@@ -135,7 +138,7 @@ export default function AboutScreen() {
           </Section>
 
           {/* ======================== what we monitor ======================= */}
-          <Section index={4} title="What FireSight Monitors">
+          <Section index={4} title="What Ignova Monitors">
             <View style={styles.monitorRow}>
               <MonitorChip icon="flame" label="Wildfires" color={COLOR.accent} />
               <MonitorChip icon="thermometer-outline" label="Heat anomalies" color="#E8A23C" />
@@ -147,7 +150,7 @@ export default function AboutScreen() {
           {/* ============================ mission =========================== */}
           <Section index={5} title="Mission">
             <Text style={styles.para}>
-              Wildfire information should be easy to understand before it matters. FireSight's
+              Wildfire information should be easy to understand before it matters. Ignova's
               purpose is to help people understand wildfire activity and environmental
               conditions around the places that matter to them — early, clearly, and without
               noise.
@@ -159,7 +162,7 @@ export default function AboutScreen() {
             <View style={styles.disclaimerCard}>
               <Ionicons name="information-circle-outline" size={17} color="#E8B23C" />
               <Text style={styles.disclaimerText}>
-                FireSight is an informational monitoring tool, not an official emergency
+                Ignova is an informational monitoring tool, not an official emergency
                 service. Satellite detections are not automatically confirmed wildfires,
                 points are approximate, and wildfire conditions can change rapidly. Always
                 follow guidance from local authorities and emergency services.
@@ -171,7 +174,7 @@ export default function AboutScreen() {
           <Section index={7} title="App Information">
             <View style={styles.infoCard}>
               <InfoRow label="Version" value={VERSION} />
-              <InfoRow label="Product" value="FireSight — wildfire monitoring & intelligence" />
+              <InfoRow label="Product" value="Ignova — wildfire monitoring & intelligence" />
               <InfoRow
                 label="Acknowledgements"
                 value="NASA FIRMS · WFIGS · open geospatial basemap data (Natural Earth)"

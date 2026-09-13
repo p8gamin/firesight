@@ -3,7 +3,7 @@
  * screen's two map implementations:
  *
  *   • MapSurface.native.tsx — react-native-maps (iOS / Android)
- *   • MapSurface.web.tsx    — FireSight's SVG basemap + gesture camera
+ *   • MapSurface.web.tsx    — Ignova's SVG basemap + gesture camera
  *
  * (MapSurface.tsx is the type-level module TS resolves for the import;
  * Metro swaps in the platform implementation at bundle time, which keeps
@@ -27,7 +27,7 @@ export interface MapSurfaceProps {
   locations: Location[];
   /** Currently selected saved-location id (drives the highlighted marker). */
   selectedLocationId: string | null;
-  /** The user's position — rendered as the FireSight teal dot when known. */
+  /** The user's position — rendered as the Ignova teal dot when known. */
   userPos: GeoPoint | null;
   /**
    * Where the map should centre: the user's primary saved location (their
@@ -55,12 +55,12 @@ export interface MapSurfaceProps {
 export interface MapSurfaceHandle {
   /**
    * Fly the camera so `point` sits at the viewport centre. `scale` is the
-   * FireSight plane scale (screen px per plane px); omit to zoom in one step
+   * Ignova plane scale (screen px per plane px); omit to zoom in one step
    * from the current view.
    */
   flyTo(point: GeoPoint, opts?: { scale?: number }): void;
   /** Multiply the current zoom by `factor` (>1 in, <1 out), keeping the centre. */
   zoomBy(factor: number): void;
-  /** Return to FireSight's North America framing. */
+  /** Return to Ignova's North America framing. */
   fitNorthAmerica(): void;
 }

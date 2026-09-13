@@ -270,7 +270,7 @@ body {
  * a hairline light ring, so it reads as a pill of glass floating over the
  * hero photo. Framer-motion animates width / opacity / transform inline;
  * this stylesheet only adds the static glass look, the hover state of the
- * section links, and the collapsed-state helpers. The top-left FireSight
+ * section links, and the collapsed-state helpers. The top-left Ignova
  * brand and the Get Started CTA are shown on md+ (like the old NavBar's
  * pills); on smaller widths they are hidden so they can never collide with
  * the centered capsule. */
@@ -338,10 +338,10 @@ body {
 }
 
 /* ================================================================
- * FireSight shiny brand button (web).
+ * Ignova shiny brand button (web).
  *
- * The top-left FireSight logo + wordmark rendered as a compact pill with
- * the rotating conic-gradient shine, themed to the FireSight palette:
+ * The top-left Ignova logo + wordmark rendered as a compact pill with
+ * the rotating conic-gradient shine, themed to the Ignova palette:
  * deep forest green base with an ember-orange highlight sweeping around
  * the border. Uses Houdini @property so the angle/percent interpolate
  * smoothly; browsers without @property fall back to a static ring.

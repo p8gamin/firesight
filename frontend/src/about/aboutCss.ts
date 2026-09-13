@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { isWeb } from '../design/platform';
 
 /**
- * Web-only CSS for the FireSight About screen: frosted surfaces and tap
+ * Web-only CSS for the Ignova About screen: frosted surfaces and tap
  * states (hover gated to precise pointers, focus never hidden, reduced
  * motion respected). Layout/typography live in RN style objects.
  */
@@ -40,7 +40,7 @@ export const ABOUT_CSS = `
 }
 `;
 
-const STYLE_ID = 'firesight-about-css';
+const STYLE_ID = 'ignova-about-css';
 
 /** Injects ABOUT_CSS once into the document head (no-op on native). */
 export function useAboutStyles() {

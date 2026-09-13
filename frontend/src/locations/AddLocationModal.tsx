@@ -449,7 +449,7 @@ function FindStep({
 
   return (
     <View style={styles.step}>
-      <Text style={styles.question}>Where should FireSight monitor?</Text>
+      <Text style={styles.question}>Where should Ignova monitor?</Text>
       <Text style={styles.hint}>Search a city, town, region, address or landmark.</Text>
 
       <View style={styles.searchUnit} {...webClass('lc-blur')}>
@@ -701,7 +701,7 @@ function MonitorStep({
   return (
     <View style={styles.step}>
       <Text style={styles.question}>Monitor for</Text>
-      <Text style={styles.hint}>Choose what FireSight watches around this location.</Text>
+      <Text style={styles.hint}>Choose what Ignova watches around this location.</Text>
       <View style={styles.toggleList}>
         {MONITOR_ROWS.map((r) => (
           <ToggleRow

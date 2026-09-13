@@ -1,7 +1,7 @@
 /**
  * Guards for account-dependent screens.
  *
- * The public FireSight experience (hero, map, fire details, about) stays
+ * The public Ignova experience (hero, map, fire details, about) stays
  * open to everyone. Screens that are inherently personal — saved Locations,
  * personalized Alerts — show a friendly sign-in prompt instead of their
  * content until the user authenticates. No route is hard-blocked; the map
@@ -39,7 +39,7 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
         </View>
         <Text style={styles.gateHeading}>Sign in to use this</Text>
         <Text style={styles.gateBody}>
-          Saved locations and personalized alerts live with your FireSight
+          Saved locations and personalized alerts live with your Ignova
           account. The map and live fire data stay open to everyone.
         </Text>
         <Pressable

@@ -1,5 +1,5 @@
 /**
- * Design tokens + copy for the FireSight hero. Values follow the Emil
+ * Design tokens + copy for the Ignova hero. Values follow the Emil
  * design-eng guidance: a near-monochrome palette with one ember accent, and
  * copy set in Inter (medium headlines + wordmark, regular body) so the
  * message reads in a single voice.
@@ -108,7 +108,7 @@ export const FONT = {
   interRegular: 'Inter_400Regular',
   interMedium: 'Inter_500Medium',
   interSemiBold: 'Inter_600SemiBold',
-  /** Playfair Display italic — kept loaded for legacy screens, not used by current FireSight copy. */
+  /** Playfair Display italic — kept loaded for legacy screens, not used by current Ignova copy. */
   playfairItalic: 'PlayfairDisplay_400Regular_Italic',
 } as const;
 
@@ -129,7 +129,7 @@ export const COPY = {
   headingLine1: 'See Fire.',
   headingLine2: 'Before it Spreads',
   cta: 'Start Digging',
-  wordmark: 'FireSight',
+  wordmark: 'Ignova',
   nav: {
     home: 'Home',
     map: 'Map',
@@ -140,7 +140,7 @@ export const COPY = {
   },
 } as const;
 
-/** Navigation items in order. The five FireSight destinations. */
+/** Navigation items in order. The five Ignova destinations. */
 export const NAV_ITEMS = [
   { label: COPY.nav.home, active: true },
   { label: COPY.nav.map, active: false },

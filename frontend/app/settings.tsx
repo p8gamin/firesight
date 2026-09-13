@@ -11,7 +11,7 @@ import { defaultAvatarUri, googleAvatarUrl } from '../src/lib/userDisplay';
  * /settings — account settings. Reached from the nav's Profile dropdown
  * (web) or the Profile pill (native). Minimal for now: confirms the signed-in
  * account and offers sign-out; more settings will land here later. Styled
- * with the app's dark tokens so it reads as part of FireSight.
+ * with the app's dark tokens so it reads as part of Ignova.
  */
 export default function SettingsRoute() {
   const router = useRouter();
@@ -54,7 +54,7 @@ export default function SettingsRoute() {
         <Text style={styles.heading}>Settings</Text>
         <Text style={styles.body}>
           {session
-            ? `Signed in as ${user?.email ?? 'FireSight account'}.`
+            ? `Signed in as ${user?.email ?? 'Ignova account'}.`
             : 'You are signed out.'}
         </Text>
         {session ? (

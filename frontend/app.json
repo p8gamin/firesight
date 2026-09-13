@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "FireSight",
+    "name": "Ignova",
     "slug": "wildfire-monitor",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -14,7 +14,11 @@
       "adaptiveIcon": {
         "backgroundColor": "#0B0E11"
       },
-      "package": "com.lithos.wildfiremonitor"
+      "package": "com.lithos.wildfiremonitor",
+      "permissions": [
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
     },
     "plugins": [
       "expo-router",
@@ -23,9 +27,15 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "FireSight uses your location to show wildfire activity near you."
+          "locationWhenInUsePermission": "Ignova uses your location to show wildfire activity near you."
         }
       ]
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "22a92e91-d3bb-49d9-aae8-7553e578cd1d"
+      }
+    }
   }
 }

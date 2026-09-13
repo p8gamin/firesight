@@ -1,7 +1,7 @@
 /**
- * FireSight backend configuration.
+ * Ignova backend configuration.
  *
- * The frontend talks ONLY to the FireSight FastAPI backend — never to the
+ * The frontend talks ONLY to the Ignova FastAPI backend — never to the
  * upstream data providers it aggregates.
  *
  * Base URL resolution (first match wins):

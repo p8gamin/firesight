@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { isWeb } from '../design/platform';
 
 /**
- * Web-only CSS for the FireSight Alerts screen. Layout, colors and typography
+ * Web-only CSS for the Ignova Alerts screen. Layout, colors and typography
  * live in RN style objects; this stylesheet adds the handful of effects RN
  * can't express: backdrop blur on the filter bar, card hover lift, filter
  * hover/brightness, and their reduced-motion / touch guards.
@@ -68,7 +68,7 @@ export const ALERT_CSS = `
 }
 `;
 
-const STYLE_ID = 'firesight-alerts-css';
+const STYLE_ID = 'ignova-alerts-css';
 
 /** Injects ALERT_CSS once into the document head (no-op on native). */
 export function useAlertStyles() {

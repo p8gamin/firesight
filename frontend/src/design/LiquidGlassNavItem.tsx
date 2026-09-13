@@ -7,6 +7,9 @@ export interface LiquidGlassNavItemProps {
   label: string;
   /** Whether this item is the currently selected section. */
   active?: boolean;
+  /** Compact pill (phone screens) — smaller type + padding so the full
+   * five-section nav fits alongside the brand and the Sign In/Up pill. */
+  compact?: boolean;
   onPress?: () => void;
 }
 
@@ -22,6 +25,7 @@ export interface LiquidGlassNavItemProps {
 export default function LiquidGlassNavItem({
   label,
   active = false,
+  compact = false,
   onPress,
 }: LiquidGlassNavItemProps) {
   return (
@@ -31,10 +35,11 @@ export default function LiquidGlassNavItem({
       accessibilityState={{ selected: active }}
       style={({ pressed }) => [
         styles.wrap,
+        compact && styles.wrapCompact,
         pressed ? styles.pressed : null,
       ]}
     >
-      <View style={[styles.pill, active ? styles.pillActive : null]}>
+      <View style={[styles.pill, compact && styles.pillCompact, active ? styles.pillActive : null]}>
         {/* Top-lit translucent sheen over the tinted base */}
         <LinearGradient
           colors={
@@ -47,7 +52,7 @@ export default function LiquidGlassNavItem({
         />
         <Text
           style={[
-            styles.label,
+            compact ? styles.labelCompact : styles.label,
             active ? styles.labelActive : styles.labelIdle,
           ]}
         >
@@ -67,6 +72,12 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 5 },
     elevation: 6,
   },
+  // Android renders elevation through its native shadow system, which is
+  // comparatively expensive; five pills × heavy elevation shows up in scroll
+  // frames. Compact pills keep the look with a lighter shadow.
+  wrapCompact: {
+    elevation: 3,
+  },
   pill: {
     borderRadius: 999,
     overflow: 'hidden',
@@ -78,6 +89,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  pillCompact: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
   pillActive: {
     backgroundColor: 'rgba(22,28,35,0.5)',
     borderColor: 'rgba(255,255,255,0.42)',
@@ -86,6 +101,11 @@ const styles = StyleSheet.create({
     fontFamily: FONT.interMedium,
     fontSize: 14,
     lineHeight: 20,
+  },
+  labelCompact: {
+    fontFamily: FONT.interMedium,
+    fontSize: 11.5,
+    lineHeight: 16,
   },
   labelIdle: {
     color: 'rgba(255,255,255,0.82)',

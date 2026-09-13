@@ -12,7 +12,7 @@
  *   listbox) with the same staggered item reveal (0.03s, x: -20 → 0);
  * - the same rotating ChevronDown (0.2s easeInOut).
  *
- * Differences required by FireSight:
+ * Differences required by Ignova:
  * - item actions are callbacks, not links (Settings → /settings, Log Out →
  *   Supabase signOut via the shared AuthProvider);
  * - the trigger carries the signed-in avatar between the text and the

@@ -13,7 +13,7 @@ import type { Place } from '../map/gazetteer';
 
 const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search';
 const TIMEOUT_MS = 12_000;
-const APP_USER_AGENT = 'FireSight/1.0 (wildfire monitoring demo)';
+const APP_USER_AGENT = 'Ignova/1.0 (wildfire monitoring demo)';
 
 export interface GeocodeResult {
   placeId?: number | string;
@@ -91,7 +91,7 @@ export async function geocodeQuery(query: string): Promise<Place[]> {
   } catch (e) {
     if (__DEV__) {
       console.warn(
-        '[FireSight] Address search failed —',
+        '[Ignova] Address search failed —',
         e instanceof Error ? e.message : e,
         '· (Nominatim / OpenStreetMap — no key required)'
       );

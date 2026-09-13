@@ -1,5 +1,5 @@
 /**
- * Curated FireSight place data.
+ * Curated Ignova place data.
  *
  * - SEARCH: cities + states/provinces + countries the search field resolves
  *   (fly-to targets). States/provinces come from the generated basemap data.

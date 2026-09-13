@@ -18,7 +18,7 @@ export interface MiniMarker {
 
 /**
  * Compact, non-interactive map for the Locations experience. Reuses the real
- * FireSight basemap (MapScene) with a static camera centred on the saved
+ * Ignova basemap (MapScene) with a static camera centred on the saved
  * location: the monitoring radius draws as a dashed ring, the saved location
  * as the teal centre dot, and activity markers are placed by their true
  * bearing/distance. Used by the add/edit flow's preview and the location

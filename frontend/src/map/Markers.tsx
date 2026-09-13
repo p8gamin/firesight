@@ -26,7 +26,7 @@ import type { MapFire, FireTier } from '../types';
 /**
  * Legacy three-level marker tier from the concern score (65/35 bands).
  * Kept for screens that read it (e.g. /fire/[id] hint copy); the map
- * markers themselves now use the four FireSight concern categories.
+ * markers themselves now use the four Ignova concern categories.
  */
 export function tierOf(concern: number): FireTier {
   if (concern >= 65) return 'high';

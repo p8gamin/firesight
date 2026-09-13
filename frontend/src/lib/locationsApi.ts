@@ -21,7 +21,7 @@
  * `auth.uid()` the WITH CHECK policy validates against).
  *
  * The table stores the location's identity (name + coordinates). Everything
- * else the FireSight UI tracks per location (monitoring radius, monitor and
+ * else the Ignova UI tracks per location (monitoring radius, monitor and
  * alert toggles) has no column in the schema, so it lives in the app layer
  * (see toLocation) — persisted client-side by the store, never sent to
  * Postgres.

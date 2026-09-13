@@ -12,7 +12,7 @@ export interface GeoPoint {
 
 export type LocationKind = 'home' | 'school' | 'family' | 'custom';
 
-/** What FireSight monitors around a saved location. */
+/** What Ignova monitors around a saved location. */
 export interface LocationMonitors {
   fires: boolean;
   heat: boolean;
@@ -42,7 +42,7 @@ export interface Location {
   /** Monitoring / alert radius in kilometres. */
   radiusKm: number;
   alertsEnabled: boolean;
-  /** Which activity types FireSight watches around this location. */
+  /** Which activity types Ignova watches around this location. */
   monitors: LocationMonitors;
   /** Which events this location should alert on. */
   alertPrefs: LocationAlertPrefs;
@@ -143,7 +143,7 @@ export interface ConcernFactor {
 }
 
 // ---------------------------------------------------------------------------
-// FireSight Map — wildfire intelligence layers. When the Python backend is
+// Ignova Map — wildfire intelligence layers. When the Python backend is
 // connected these interfaces map 1:1 to its payloads (NASA FIRMS detections,
 // WFIGS perimeters/incidents, weather + air-quality feeds).
 // ---------------------------------------------------------------------------
@@ -167,7 +167,7 @@ export interface MapFire {
   satellites: string[];
   /** Fire Radiative Power in megawatts. */
   frpMw: number;
-  /** FireSight concern score, 0..100. */
+  /** Ignova concern score, 0..100. */
   concern: number;
   /**
    * Concern Score category as reported by the backend (Low / Moderate /

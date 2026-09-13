@@ -6,7 +6,7 @@ import ImageStreamHero, { type StreamImage } from './ImageStreamHero.web';
 import { STREAM_EXTRA_IMAGES } from './constants';
 
 /**
- * FireSight image gallery (web only).
+ * Ignova image gallery (web only).
  *
  * A horizontal row of five image cards below the hero, driven by vertical
  * scroll: a tall scroll track with a sticky viewport, and a filmstrip whose
@@ -333,7 +333,7 @@ export default function ScrollGallery() {
           axis={52}
         >
           <div className="sg-outro-head">
-            <p className="sg-wordmark">FireSight</p>
+            <p className="sg-wordmark">Ignova</p>
             <p className="sg-byline">A project by Krishnavivek Ivaturi.</p>
           </div>
         </ImageStreamHero>

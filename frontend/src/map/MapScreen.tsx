@@ -72,7 +72,6 @@ export default function MapScreen() {
     fires,
     heatRegions,
     perimeters,
-    loading: dataLoading,
     error: dataError,
     refresh: refreshData,
   } = useMapData();
@@ -261,18 +260,18 @@ export default function MapScreen() {
 
   const compact = width < 420;
 
-  // The status pill doubles as the live-data loading/error banner: while the
-  // backend request is in flight it shows a spinner, and on failure it stays
-  // up and retries on tap. When the user has no saved locations the store is
-  // idle — no banner, the get-started card speaks instead.
+  // The status pill doubles as the live-data error banner: on failure it
+  // stays up and retries on tap. The loading state is owned by the global
+  // LiveDataBar (mounted in the root layout), so it shows on every screen —
+  // not just the map — and the map no longer duplicates it. When the user
+  // has no saved locations the store is idle — no banner, the get-started
+  // card speaks instead.
   const toastBanner: { text: string; spinner: boolean; retry: boolean } | null =
     dataError
       ? { text: 'Live heat data unavailable — tap to retry', spinner: false, retry: true }
-      : dataLoading
-        ? { text: 'Loading live heat data…', spinner: true, retry: false }
-        : status
-          ? { text: status, spinner: status === 'Locating…', retry: false }
-          : null;
+      : status
+        ? { text: status, spinner: status === 'Locating…', retry: false }
+        : null;
 
   return (
     <View style={styles.root}>

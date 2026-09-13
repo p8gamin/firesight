@@ -305,6 +305,8 @@ export async function removeLocation(id: string): Promise<void> {
 export function useLocationsStore(): {
   locations: Location[];
   loading: boolean;
+  /** Raw lifecycle: 'idle' | 'loading' | 'ready' | 'error'. */
+  phase: 'idle' | 'loading' | 'ready' | 'error';
   error: string | null;
   retry: () => void;
 } {
@@ -312,6 +314,7 @@ export function useLocationsStore(): {
   return {
     locations: snapshot,
     loading: state.phase === 'idle' || state.phase === 'loading',
+    phase: state.phase,
     error: state.error,
     retry: retryLoadLocations,
   };

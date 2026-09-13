@@ -66,6 +66,9 @@ export interface FiresState {
   error: string | null;
   /** Latest successful sync across locations. */
   syncedAt: string | null;
+  /** True while ANY location's /fires request is in flight (initial load,
+   *  interval refresh, foreground catch-up, or a newly added location). */
+  syncing: boolean;
 }
 
 /** Per-location fetch bookkeeping (internal to the store). */
@@ -87,6 +90,7 @@ let state: FiresState = {
   origin: null,
   error: null,
   syncedAt: null,
+  syncing: false,
 };
 
 const listeners = new Set<() => void>();
@@ -206,6 +210,9 @@ function recompute(): void {
     origin: locations[0] ? { ...locations[0].point } : null,
     error: status === 'error' ? firstError ?? 'Heat data is unavailable.' : null,
     syncedAt,
+    // Any in-flight /fires request (initial load, refresh, catch-up) — the
+    // global "retrieving live heat data" indicator reads this.
+    syncing: anyPending,
   });
 }
 
@@ -310,7 +317,14 @@ function resetData(): void {
   groupsByLocation.clear();
   entries.clear();
   runTokens.clear();
-  setState({ status: 'idle', groups: [], origin: null, error: null, syncedAt: null });
+  setState({
+    status: 'idle',
+    groups: [],
+    origin: null,
+    error: null,
+    syncedAt: null,
+    syncing: false,
+  });
 }
 
 // Re-sync automatically whenever the saved locations change (sign-in load,

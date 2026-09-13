@@ -6,6 +6,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useFonts } from 'expo-font';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider } from '../src/lib/AuthProvider';
+import LiveDataBar from '../src/design/LiveDataBar';
 import {
   Inter_400Regular,
   Inter_500Medium,
@@ -46,6 +47,9 @@ export default function RootLayout() {
               contentStyle: { backgroundColor: '#000' },
             }}
           />
+          {/* Global "Loading live heat data…" pill — visible on every screen
+           * while heat data is being retrieved (not just the Map). */}
+          <LiveDataBar />
         </AuthProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
